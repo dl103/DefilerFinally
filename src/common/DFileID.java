@@ -5,7 +5,7 @@ public class DFileID {
 
 	private int _dFID;
 
-	DFileID(int dFID) {
+	public DFileID(int dFID) {
 		_dFID = dFID;
 	}
 
@@ -15,7 +15,7 @@ public class DFileID {
 	    
 	public boolean equals(Object other){
 		DFileID otherID =  (DFileID) other;
-		if(otherID.getID() == _dFID){
+		if(otherID.getDFileID() == _dFID){
 			return true;
 		}
 		return false;
