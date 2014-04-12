@@ -1,78 +1,110 @@
-package dfs;
+package dblockcache;
 
-import java.util.List;
+public class MyDBuffer extends DBuffer {
 
-import virtualdisk.VirtualDisk;
-
-import common.Constants;
-import common.DFileID;
-
-import dblockcache.DBuffer;
-import dblockcache.DBufferCache;
-import dblockcache.MyDBuffer;
-
-public class MyDFS extends DFS {
-	
-	private DBuffer myDBuffer;
-	private DBufferCache myDBufferCache;
-	private VirtualDisk myVirtualDisk;
-	private int idCount = 0;
+	private boolean isClean, isValid, isBusy, isPinned, isHeld;
+	private byte[] myBuffer;
 	
 	
-	@Override
-	public void init() {
-		//myDBufferCache = new DBufferCache(Constants.NUM_OF_CACHE_BLOCKS);
-		//myVirtualDisk = new VirtualDisk(Constants.vdiskName, true);
+	
+	
+	
+	
+	/* Start an asynchronous fetch of associated block from the volume */
+	public void startFetch();
+
+	/* Start an asynchronous write of buffer contents to block on volume */
+	public void startPush();
+
+	/* Check whether the buffer has valid data 
+	 A dbuf is valid iff it has the “correct” copy of the data */ 
+	public boolean checkValid(){
+		return isValid;
+	}
+	
+	/*Suggestion.  
+	 * A dbuf is pinned if I/O is in progress, i.e., a VDF request has started but not yet completed.  
+	 * Don’t evict a dbuf that is pinned or held: pick another candidate.
+	 * */
+	public boolean checkPinned(){
+		return isPinned;
+	}
+	
+	/*
+	 *  A dbuf is held if DFS obtained a reference to the dbuf from getBlock but has not yet released the dbuf.  
+	 */
+	public boolean checkHeld(){
+		return isHeld;
 	}
 
-	@Override
-	public DFileID createDFile() {
-		
-		if (idCount == Constants.MAX_DFILES) {
-			idCount = 0;
+	/* Wait until the buffer has valid data, i.e., wait for fetch to complete */
+	public boolean waitValid(){
+		while (true){
+			//
 		}
-		DFileID newFile = new DFileID(idCount);
+		return true;
+	}
+
+	/* Check whether the buffer is dirty, i.e., has modified data written back to disk? 
+	 * A dbuf is dirty iff it is valid and has an update (a write) that has not yet been written to disk. 
+	 * */
+	@Override
+	public boolean checkClean(){
+		return isClean;
+	}
+
+	/* Wait until the buffer is clean, i.e., wait until a push operation completes */
+	public boolean waitClean(){
+		while (true){
+
+		}
+		return true;
+	}
+
+	/* Check if buffer is evictable: not evictable if I/O in progress, or buffer is held */
+	public boolean isBusy(){
+		return isHeld || isBusy|| isPinned;
+	}
+
+	/*
+	 * reads into the buffer[] array from the contents of the DBuffer. Check
+	 * first that the DBuffer has a valid copy of the data! startOffset and
+	 * count are for the buffer array, not the DBuffer. Upon an error, it should
+	 * return -1, otherwise return number of bytes read.
+	 */
+	public int read(byte[] buffer, int startOffset, int count){
+		if (!isHeld || !isPinned || !isValid){
+			return -1;
+		}
+		int bytesRead=0;
 		
+		for (int i=0; i<count;i++){
+			
+			buffer[i+startOffset]=myBuffer[i];
+			bytesRead++;
+		}
 		
-		return null;
+		return bytesRead;
 	}
 
-	@Override
-	public void destroyDFile(DFileID dFID) {
-		// TODO Auto-generated method stub
-		
+	/*
+	 * writes into the DBuffer from the contents of buffer[] array. startOffset
+	 * and count are for the buffer array, not the DBuffer. Mark buffer dirty!
+	 * Upon an error, it should return -1, otherwise return number of bytes
+	 * written.
+	 */
+	public int write(byte[] buffer, int startOffset, int count){
+		return -1;
 	}
 
-	@Override
-	public int read(DFileID dFID, byte[] buffer, int startOffset, int count) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	/* An upcall from VirtualDisk layer to inform the completion of an IO operation */
+	public void ioComplete();
 
-	@Override
-	public int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	/* An upcall from VirtualDisk layer to fetch the blockID associated with a startRequest operation */
+	public int getBlockID();
 
-	@Override
-	public int sizeDFile(DFileID dFID) {
-		// TODO Auto-generated method stub
-		return 0;
+	/* An upcall from VirtualDisk layer to fetch the buffer associated with DBuffer object*/
+	public byte[] getBuffer(){
+		return myBuffer;
 	}
-
-	@Override
-	public List<DFileID> listAllDFiles() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void sync() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	
-
 }
