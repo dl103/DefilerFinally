@@ -107,7 +107,14 @@ public class MyDBuffer extends DBuffer {
 	 * return -1, otherwise return number of bytes read.
 	 */
 	public int read(byte[] buffer, int startOffset, int count){
+		//check that dbuffer has a valid copy of the data
+		//check that count are for the buffer array
 		if (!isHeld || !isPinned || !isValid){
+			System.out.println("cannot read invalid or something");
+			return -1;
+		}
+		if (count>myBuffer.length || count > buffer.length){
+			System.out.println("Buffer length is too small");
 			return -1;
 		}
 		int bytesRead=0;
@@ -128,7 +135,13 @@ public class MyDBuffer extends DBuffer {
 	 * written.s
 	 */
 	public int write(byte[] buffer, int startOffset, int count){
-		return -1;
+		if (isHeld||!isPinned){
+			return -1;
+		}
+		int bytesWritten=0;
+		
+		isClean=false;
+		return bytesWritten;
 	}
 
 	/* An upcall from VirtualDisk layer to inform the completion of an IO operation */
