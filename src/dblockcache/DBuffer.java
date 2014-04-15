@@ -1,5 +1,7 @@
 package dblockcache;
 
+import java.util.List;
+
 public abstract class DBuffer {
 	
 	/* Start an asynchronous fetch of associated block from the volume */
@@ -47,4 +49,6 @@ public abstract class DBuffer {
 	
 	/* An upcall from VirtualDisk layer to fetch the buffer associated with DBuffer object*/
 	public abstract byte[] getBuffer(); 
+	
+	public abstract List<Integer> getBlockmap();
 }

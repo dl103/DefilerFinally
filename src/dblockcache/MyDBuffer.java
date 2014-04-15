@@ -1,8 +1,15 @@
 package dblockcache;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import virtualdisk.MyVirtualDisk;
+
 import common.Constants;
 
 public class MyDBuffer extends DBuffer {
@@ -151,6 +158,17 @@ public class MyDBuffer extends DBuffer {
 		
 		isClean=false;
 		return bytesWritten;
+	}
+	
+	public List<Integer> getBlockmap() {
+		IntBuffer intBuf = ByteBuffer.wrap(myBuffer).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
+		int[] array = new int[intBuf.remaining()];
+		intBuf.get(array);
+		List<Integer> blockmap = new ArrayList<Integer>();
+		for (int block : array) {
+			blockmap.add(block);
+		}
+		return blockmap;
 	}
 
 	/* An upcall from VirtualDisk layer to inform the completion of an IO operation */
