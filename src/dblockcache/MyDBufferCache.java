@@ -19,7 +19,7 @@ public class MyDBufferCache extends DBufferCache {
 		
 		/*pseudocode*/
 		synchronized(this){
-			//if the buffer is in the cache
+//			if the buffer is in the cache
 			for all dbuffers in the queue{
 				if dbuffer.getblockid == blockID:
 					//remove the dbuff and add it back to the queue
@@ -29,10 +29,17 @@ public class MyDBufferCache extends DBufferCache {
 					return dbuffer;
 			}
 			
-			//the buffer is not in the cache ie we need to evict.
-			
-			
-			
+//			the buffer is not in the cache ie we need to evict.
+			for all dbuffers in the queue{
+				//if the buffer is not busy
+				if (!buffer.isBusy){
+					queue.pop(buffer)
+				}
+			}
+//			if we have gone through all the buffers but we dont find any to evict
+//			we have to wait for one buffer to be available to get evicted
+//			then we evict that shit
+//			push that block into buffer
 		}
 		
 		

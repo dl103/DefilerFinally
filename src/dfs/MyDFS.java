@@ -21,8 +21,7 @@ public class MyDFS extends DFS {
 	private MyVirtualDisk myDisk; 
 	private MyDBufferCache cache;  //need to make this
 	private PriorityQueue<DFileID> fileQueue = new PriorityQueue<DFileID>();
-	private HashMap<DFileID, ArrayList<Integer>> inodeMap = new HashMap<DFileID, ArrayList<Integer>>();
-	private ArrayList<Boolean> bitMap = new ArrayList<Boolean>(); //Wait for Dayvid
+	private boolean[] bitMap = new boolean[Constants.NUM_OF_BLOCKS]; //Wait for Dayvid
 	
 	
 	@Override
@@ -50,7 +49,6 @@ public class MyDFS extends DFS {
 		}
 		DFileID newFile = new DFileID(fileCount);
 		fileQueue.add(newFile);
-		inodeMap.put(newFile, new ArrayList<Integer>());
 		
 	
 		
@@ -81,17 +79,13 @@ public class MyDFS extends DFS {
 	@Override
 	public int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
 		
-		if (!inodeMap.containsKey(dFID)) {
-			dFID = createDFile();
-		}
 		
-		DBuffer inodeBLock = cache.getBlock(dFID.getDFileID());
+		DBuffer inodeBlock = cache.getBlock(dFID.getDFileID());
 		ArrayList<Integer> blockList = inodeBlock.getBlockmap();
 		
-		/* Need to implement:
-		 * If not enough blocks, consult bitmap and add to arraylist
-		 * 
-		 */
+		while (blockList.size() * Constants.BLOCK_SIZE < count) {
+			blockList.add(findFirstFree());
+		}
 		
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
@@ -123,7 +117,15 @@ public class MyDFS extends DFS {
 		
 	}
 	
-	
+	public int findFirstFree() {		
+		for (int i = 0 ; i < bitMap.length; i++) {
+			if (bitMap[i] == true) {
+				bitMap[i] = false;
+				return i;
+			}			
+		}
+		return -1;
+	}
 	
 	
 	
