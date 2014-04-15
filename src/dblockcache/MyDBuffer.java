@@ -1,5 +1,8 @@
 package dblockcache;
 
+import java.io.IOException;
+
+import virtualdisk.MyVirtualDisk;
 import common.Constants;
 
 public class MyDBuffer extends DBuffer {
@@ -23,6 +26,9 @@ public class MyDBuffer extends DBuffer {
 			disk.startRequest(this, Constants.DiskOperationType.READ);
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} 
 	}
 
@@ -34,18 +40,21 @@ public class MyDBuffer extends DBuffer {
 			disk.startRequest(this, Constants.DiskOperationType.WRITE);
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} 
 	}
 
 	/* Check whether the buffer has valid data 
-	 A dbuf is valid iff it has the “correct” copy of the data */ 
+	 A dbuf is valid iff it has the â€œcorrectâ€� copy of the data */ 
 	public boolean checkValid(){
 		return isValid;
 	}
 
 	/*Suggestion.  
 	 * A dbuf is pinned if I/O is in progress, i.e., a VDF request has started but not yet completed.  
-	 * Don’t evict a dbuf that is pinned or held: pick another candidate.
+	 * Donâ€™t evict a dbuf that is pinned or held: pick another candidate.
 	 * */
 	public boolean checkPinned(){
 		return isPinned;
