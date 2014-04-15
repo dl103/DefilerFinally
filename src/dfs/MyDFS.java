@@ -3,13 +3,18 @@ package dfs;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import virtualdisk.MyVirtualDisk;
 
 import common.Constants;
 import common.DFileID;
+import dblockcache.DBuffer;
 import dblockcache.DBufferCache;
+import dblockcache.MyDBuffer;
 import dblockcache.MyDBufferCache;
 
 public class MyDFS extends DFS {
@@ -18,6 +23,10 @@ public class MyDFS extends DFS {
 	private ArrayList<DFileID> fileList = new ArrayList<DFileID>();
 	private MyVirtualDisk myDisk; 
 	private MyDBufferCache cache;  //need to make this
+	private PriorityQueue<DFileID> fileQueue = new PriorityQueue<DFileID>();
+	private HashMap<DFileID, ArrayList<DBuffer>> inodeMap = new HashMap<DFileID, ArrayList<DBuffer>>();
+	
+	
 	
 	@Override
 	public void init() {
@@ -37,6 +46,9 @@ public class MyDFS extends DFS {
 			fileCount = 0;
 		}
 		DFileID newFile = new DFileID(fileCount);
+		//also have to create inode?
+		
+	
 		
 		return newFile;
 	}
@@ -50,7 +62,8 @@ public class MyDFS extends DFS {
 	public int read(DFileID dFID, byte[] buffer, int startOffset, int count) {
 		
 		int blockID = dFID.getDFileID();
-		cache.getBlock(blockID);
+		DBuffer block = cache.getBlock(blockID);
+		block.read(buffer, startOffset, count);
 		
 		return 0;
 	}
@@ -59,13 +72,17 @@ public class MyDFS extends DFS {
 	public int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
 		
 		int blockID = dFID.getDFileID();
+		DBuffer block = cache.getBlock(blockID);
+		block.write(buffer, startOffset, count);
 		
 		return 0;
 	}
 
 	@Override
 	public int sizeDFile(DFileID dFID) {
-		// TODO Auto-generated method stub
+		
+		
+		
 		return 0;
 	}
 
