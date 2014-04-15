@@ -1,20 +1,17 @@
 package dfs;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Queue;
 
 import virtualdisk.MyVirtualDisk;
 
 import common.Constants;
 import common.DFileID;
+
 import dblockcache.DBuffer;
-import dblockcache.DBufferCache;
-import dblockcache.MyDBuffer;
 import dblockcache.MyDBufferCache;
 
 public class MyDFS extends DFS {
@@ -33,6 +30,12 @@ public class MyDFS extends DFS {
 		try {
 			myDisk = new MyVirtualDisk(Constants.vdiskName, true);
 			cache = new MyDBufferCache(Constants.NUM_OF_CACHE_BLOCKS); 
+			
+			/*
+			 * Need to retrieve the bitmap from virtual disk. 
+			 */
+			
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -62,7 +65,9 @@ public class MyDFS extends DFS {
 	@Override
 	public int read(DFileID dFID, byte[] buffer, int startOffset, int count) {
 		
-		ArrayList<Integer> blockList = inodeMap.get(dFID);
+		DBuffer inodeBlock = cache.getBlock(dFID.getDFileID());
+		
+		ArrayList<Integer> blockList = inodeBlock.getBlockmap();
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
 			DBuffer block = cache.getBlock(blockID);
@@ -76,11 +81,12 @@ public class MyDFS extends DFS {
 	@Override
 	public int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
 		
-		
 		if (!inodeMap.containsKey(dFID)) {
 			dFID = createDFile();
 		}
-		ArrayList<Integer> blockList = inodeMap.get(dFID);
+		
+		DBuffer inodeBLock = cache.getBlock(dFID.getDFileID());
+		ArrayList<Integer> blockList = inodeBlock.getBlockmap();
 		
 		/* Need to implement:
 		 * If not enough blocks, consult bitmap and add to arraylist
@@ -99,7 +105,8 @@ public class MyDFS extends DFS {
 	@Override
 	public int sizeDFile(DFileID dFID) {
 		
-		
+		//for now, just consulting either a separate arraylist or first element
+		//in inode arraylist
 		
 		return 0;
 	}
