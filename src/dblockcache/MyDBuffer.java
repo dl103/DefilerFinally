@@ -1,7 +1,5 @@
 package dblockcache;
 
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
@@ -23,45 +21,50 @@ public class MyDBuffer extends DBuffer {
 	public MyDBuffer(){
 		
 		//blockID= //some id
-		//disk = //somedisk
+//		disk = //somedisk
+//		isFetching=false;
+//		isClean=false;
+//		isValid=false;
+//		isBusy=false;
+//		isPinned=false;
+//		isHeld=false;
+//		isPushing=false;
+//		isFetching=false;
 	}
 	/* Start an asynchronous fetch of associated block from the volume */
+	@Override
 	public void startFetch(){
 		isFetching=true;
 
 		try {
 			disk.startRequest(this, Constants.DiskOperationType.READ);
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		} 
 	}
 
 	/* Start an asynchronous write of buffer contents to block on volume */
+	@Override
 	public void startPush(){
 		isPushing=true;
-		
+
 		try {
 			disk.startRequest(this, Constants.DiskOperationType.WRITE);
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		} 
 	}
 
 	/* Check whether the buffer has valid data 
-	 A dbuf is valid iff it has the â€œcorrectâ€� copy of the data */ 
+	 A dbuf is valid iff it has the “correct” copy of the data */
+	@Override
 	public boolean checkValid(){
 		return isValid;
 	}
 
 	/*Suggestion.  
 	 * A dbuf is pinned if I/O is in progress, i.e., a VDF request has started but not yet completed.  
-	 * Donâ€™t evict a dbuf that is pinned or held: pick another candidate.
+	 * Don’t evict a dbuf that is pinned or held: pick another candidate.
 	 * */
 	public boolean checkPinned(){
 		return isPinned;
@@ -75,6 +78,7 @@ public class MyDBuffer extends DBuffer {
 	}
 
 	/* Wait until the buffer has valid data, i.e., wait for fetch to complete */
+	@Override
 	public boolean waitValid(){
 		while (!isValid && isFetching){
 			try{
@@ -106,12 +110,12 @@ public class MyDBuffer extends DBuffer {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-
 		}
 		return true;
 	}
 
 	/* Check if buffer is evictable: not evictable if I/O in progress, or buffer is held */
+	@Override
 	public boolean isBusy(){
 		return isHeld || isBusy|| isPinned;
 	}
@@ -121,7 +125,10 @@ public class MyDBuffer extends DBuffer {
 	 * first that the DBuffer has a valid copy of the data! startOffset and
 	 * count are for the buffer array, not the DBuffer. Upon an error, it should
 	 * return -1, otherwise return number of bytes read.
+	 * For a read: the read may run off the end of the file.  
+	 * This is an "end of file" condition: just return the number of bytes read successfully.
 	 */
+	@Override
 	public int read(byte[] buffer, int startOffset, int count){
 		//check that dbuffer has a valid copy of the data
 		//check that count are for the buffer array
@@ -129,19 +136,17 @@ public class MyDBuffer extends DBuffer {
 			System.out.println("cannot read invalid or something");
 			return -1;
 		}
-		if (count>myBuffer.length || count > buffer.length){
-			System.out.println("Buffer length is too small");
-			return -1;
-		}
-		int bytesRead=0;
-		
+		int numBytesRead=0;
+
 		for (int i=0; i<count;i++){
-
+			if (i>myBuffer.length){
+				System.out.println("Buffer length is too small");
+				return numBytesRead;
+			}
 			buffer[i+startOffset]=myBuffer[i];
-			bytesRead++;
+			numBytesRead++;
 		}
-
-		return bytesRead;
+		return numBytesRead;
 	}
 
 	/*
@@ -149,15 +154,25 @@ public class MyDBuffer extends DBuffer {
 	 * and count are for the buffer array, not the DBuffer. Mark buffer dirty!
 	 * Upon an error, it should return -1, otherwise return number of bytes
 	 * written.s
+	 * For a write: if the write extends the file beyond the maximum supported length,
+	 * just stop there and return the number of bytes written successfully.
 	 */
+	@Override
 	public int write(byte[] buffer, int startOffset, int count){
 		if (isHeld||!isPinned){
 			return -1;
 		}
-		int bytesWritten=0;
-		
+		int numBytesWritten=0;
 		isClean=false;
-		return bytesWritten;
+		for (int i=0; i<count;i++){
+			if (i>myBuffer.length){
+				System.out.println("Buffer length is too small");
+				return numBytesWritten;
+			}
+			myBuffer[i]=buffer[i+startOffset];
+			numBytesWritten++;
+		}
+		return numBytesWritten;
 	}
 	
 	public List<Integer> getBlockmap() {
@@ -172,16 +187,25 @@ public class MyDBuffer extends DBuffer {
 	}
 
 	/* An upcall from VirtualDisk layer to inform the completion of an IO operation */
+	@Override
 	public void ioComplete(){
 		//no idea what to do here
+		/*
+		 * change isFetching
+		 * change isValid
+		 * notifyAll()
+		 */
+		
 	}
 
 	/* An upcall from VirtualDisk layer to fetch the blockID associated with a startRequest operation */
+	@Override
 	public int getBlockID(){
 		return blockID;
 	}
 
 	/* An upcall from VirtualDisk layer to fetch the buffer associated with DBuffer object*/
+	@Override
 	public byte[] getBuffer(){
 		return myBuffer;
 	}

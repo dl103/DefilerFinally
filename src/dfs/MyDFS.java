@@ -24,12 +24,12 @@ public class MyDFS extends DFS {
 	private MyVirtualDisk myDisk; 
 	private MyDBufferCache cache;  //need to make this
 	private PriorityQueue<DFileID> fileQueue = new PriorityQueue<DFileID>();
-	private HashMap<DFileID, ArrayList<DBuffer>> inodeMap = new HashMap<DFileID, ArrayList<DBuffer>>();
-	
+	private HashMap<DFileID, ArrayList<Integer>> inodeMap = new HashMap<DFileID, ArrayList<Integer>>();
+	private ArrayList<Boolean> bitMap = new ArrayList<Boolean>(); //Wait for Dayvid
 	
 	
 	@Override
-	public void init() {
+	public void init(){
 		try {
 			myDisk = new MyVirtualDisk(Constants.vdiskName, true);
 			cache = new MyDBufferCache(Constants.NUM_OF_CACHE_BLOCKS); 
@@ -46,7 +46,8 @@ public class MyDFS extends DFS {
 			fileCount = 0;
 		}
 		DFileID newFile = new DFileID(fileCount);
-		//also have to create inode?
+		fileQueue.add(newFile);
+		inodeMap.put(newFile, new ArrayList<Integer>());
 		
 	
 		
@@ -61,19 +62,36 @@ public class MyDFS extends DFS {
 	@Override
 	public int read(DFileID dFID, byte[] buffer, int startOffset, int count) {
 		
-		int blockID = dFID.getDFileID();
-		DBuffer block = cache.getBlock(blockID);
-		block.read(buffer, startOffset, count);
+		ArrayList<Integer> blockList = inodeMap.get(dFID);
+		for (int i = 0; i < blockList.size(); i++) {
+			int blockID = blockList.get(i);
+			DBuffer block = cache.getBlock(blockID);
+			block.read(buffer, startOffset, count);
+		}
 		
-		return 0;
+		
+		return 0; //what is this supposed to return?
 	}
 
 	@Override
 	public int write(DFileID dFID, byte[] buffer, int startOffset, int count) {
 		
-		int blockID = dFID.getDFileID();
-		DBuffer block = cache.getBlock(blockID);
-		block.write(buffer, startOffset, count);
+		
+		if (!inodeMap.containsKey(dFID)) {
+			dFID = createDFile();
+		}
+		ArrayList<Integer> blockList = inodeMap.get(dFID);
+		
+		/* Need to implement:
+		 * If not enough blocks, consult bitmap and add to arraylist
+		 * 
+		 */
+		
+		for (int i = 0; i < blockList.size(); i++) {
+			int blockID = blockList.get(i);
+			DBuffer block = cache.getBlock(blockID);
+			block.write(buffer, startOffset, count);
+		}
 		
 		return 0;
 	}
