@@ -183,7 +183,7 @@ public class MyDBuffer extends DBuffer {
 		intBuf.get(array);
 		List<Integer> blockmap = new ArrayList<Integer>();
 		for (int block : array) {
-			blockmap.add(block);
+			if(block != 0) blockmap.add(block);
 		}
 		return blockmap;
 	}

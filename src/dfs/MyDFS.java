@@ -48,7 +48,10 @@ public class MyDFS extends DFS {
 		for (int i = 0; i < Constants.MAX_DFILES; i++) {
 			DBuffer inodeBlock = myCache.getBlock(i);
 			List<Integer> blockList = inodeBlock.getBlockmap();
-			if (blockList.size() > 0) myInodeBitMap[i] = false;
+//			System.out.println("Initializing: " + i);
+			if (blockList.size() > 0) {
+				myInodeBitMap[i] = false;
+			}
 			for (int b = 0; b < blockList.size(); b++) {
 				//Accounts for the 0th entry being the file size
 				if (b != 0) myBlockBitMap[b] = false;
@@ -141,13 +144,14 @@ public class MyDFS extends DFS {
 		return -1;
 	}
 
-	public int findFirstFreeInode() {		
+	public int findFirstFreeInode() {
 		for (int i = 0 ; i < myInodeBitMap.length; i++) {
 			if (myInodeBitMap[i] == true) {
 				myInodeBitMap[i] = false;
 				return i;
 			}			
 		}
+		System.out.println("Return -1)");
 		return -1;
 	}
 
