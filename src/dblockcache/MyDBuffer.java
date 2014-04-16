@@ -21,36 +21,41 @@ public class MyDBuffer extends DBuffer {
 	public MyDBuffer(int id, VirtualDisk d){
 		blockID = id;
 		disk = d;
+		myBuffer=new byte[Constants.BLOCK_SIZE];
 		//blockID= //some id
-		//		disk = //somedisk
-		//		isFetching=false;
-		//		isClean=false;
-		//		isValid=false;
-		//		isBusy=false;
-		//		isPinned=false;
-		//		isHeld=false;
-		//		isPushing=false;
-		//		isFetching=false;
+		isClean=true;
+		isValid=false;
+		isBusy=false;
+		isPinned=false;
+		isHeld=false;
+		isPushing=false;
+		isFetching=false;
 	}
 	/* Start an asynchronous fetch of associated block from the volume */
 	@Override
 	public void startFetch(){
-		isFetching=true;
-		myBuffer = new byte[Constants.BLOCK_SIZE];
-
 		try {
+			isFetching=true;
 			disk.startRequest(this, Constants.DiskOperationType.READ);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 
 	}
-
+	
+	public void clearDBuffer(){
+		myBuffer = new byte[Constants.BLOCK_SIZE];
+		isHeld = false;
+		isValid = false;
+		isClean = true;//it is always clean from the start
+		isFetching = false;
+		isPushing = false;
+		isPinned = false;
+	}
 	/* Start an asynchronous write of buffer contents to block on volume */
 	@Override
 	public void startPush(){
-		isPushing=true;
-
 		try {
+			isPushing=true;
 			disk.startRequest(this, Constants.DiskOperationType.WRITE);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -134,10 +139,10 @@ public class MyDBuffer extends DBuffer {
 	public int read(byte[] buffer, int startOffset, int count){
 		//check that dbuffer has a valid copy of the data
 		//check that count are for the buffer array
-		/*if (!isHeld || !isPinned || !isValid){
-			System.out.println("cannot read invalid or something");
+		if (!isHeld || !isPinned || !isValid){
+			System.out.println("cannot read. invalid or something");
 			return -1;
-		}*/
+		}
 		int numBytesRead=0;
 
 		for (int i=0; i<count;i++){
@@ -161,9 +166,9 @@ public class MyDBuffer extends DBuffer {
 	 */
 	@Override
 	public int write(byte[] buffer, int startOffset, int count){
-		/*if (isHeld||!isPinned){
+		if (isHeld||!isPinned){
 			return -1;
-		}*/
+		}
 		int numBytesWritten=0;
 		isClean=false;
 		for (int i=0; i<count;i++){
@@ -176,18 +181,18 @@ public class MyDBuffer extends DBuffer {
 		}
 		return numBytesWritten;
 	}
-
+	
 	public List<Integer> getBlockmap() {
 		IntBuffer intBuf = ByteBuffer.wrap(myBuffer).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
 		int[] array = new int[intBuf.remaining()];
 		intBuf.get(array);
 		List<Integer> blockmap = new ArrayList<Integer>();
-		for (int i = 0; i < array.length; i++) {
-			if (array[i] != 0) blockmap.add(array[i]);
+		for (int block : array) {
+			blockmap.add(block);
 		}
 		return blockmap;
 	}
-
+	
 	public void writeBlockmap(List<Integer> blockmap) {
 		int[] intArray = new int[blockmap.size()];
 		for (int i = 0; i < blockmap.size(); i++) {
@@ -208,7 +213,7 @@ public class MyDBuffer extends DBuffer {
 		 * change isValid
 		 * notifyAll()
 		 */
-
+		
 	}
 
 	/* An upcall from VirtualDisk layer to fetch the blockID associated with a startRequest operation */
