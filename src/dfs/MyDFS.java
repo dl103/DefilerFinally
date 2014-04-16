@@ -21,6 +21,8 @@ public class MyDFS extends DFS {
 	private ArrayList<DFileID> fileList = new ArrayList<DFileID>();
 	private MyDBufferCache myCache;  //need to make this
 	private PriorityQueue<DFileID> fileQueue = new PriorityQueue<DFileID>();
+	
+	//true means there's free space!!!
 	private boolean[] myBlockBitMap = new boolean[Constants.NUM_OF_BLOCKS]; //Wait for Dayvid
 	private boolean[] myInodeBitMap = new boolean[Constants.MAX_DFILES];
 
@@ -67,12 +69,25 @@ public class MyDFS extends DFS {
 	@Override
 	public DFileID createDFile() {
 		int newFile = findFirstFreeInode();
-		return new DFileID(newFile);
+		DFileID dFile = new DFileID(newFile);
+		fileList.add(dFile);
+		return dFile;
 	}
 
 	@Override
 	public void destroyDFile(DFileID dFID) {
-
+		fileList.remove(dFID);
+		DBuffer inodeBlock = myCache.getBlock(dFID.getDFileID());
+		List<Integer> blockList = inodeBlock.getBlockmap();
+		for (int i = 0; i < blockList.size(); i++) {
+			myBlockBitMap[blockList.get(i)] = true;			//change in blockbitmap to indicate it is free
+			/*
+			 * Need to get actual block and clear it. 
+			 */
+		}
+		myInodeBitMap[dFID.getDFileID()] = true;			//indicate in inodebitmap that file is free
+		
+		
 	}
 
 	@Override
@@ -80,14 +95,16 @@ public class MyDFS extends DFS {
 
 		DBuffer inodeBlock = myCache.getBlock(dFID.getDFileID());
 		List<Integer> blockList = inodeBlock.getBlockmap();
+		System.out.println("MyDFS.read(): " + blockList.toString());
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
+//			System.out.println("MyDFS.reading(): " + blockID);
 			DBuffer block = myCache.getBlock(blockID);
 			if (count > Constants.BLOCK_SIZE) count = Constants.BLOCK_SIZE;
 			block.read(buffer, startOffset, count);
 		}
 
-
+//		System.out.println("Reading: " + Arrays.toString(buffer));
 		return 0; //what is this supposed to return?
 	}
 
@@ -103,15 +120,17 @@ public class MyDFS extends DFS {
 		}
 		if (count > inodeBlock.getFilesize()) inodeBlock.writeFilesize(count);
 		inodeBlock.writeBlockmap(blockList);
-//		System.out.println("MyDFS.blockList: " + blockList.toString());
+//		System.out.println("MyDFS.write(): " + blockList.toString());
 
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
+			System.out.println(blockID);
 			DBuffer block = myCache.getBlock(blockID);
 			if (count > Constants.BLOCK_SIZE) count = Constants.BLOCK_SIZE;
 			block.write(buffer, startOffset, count);
 		}
-
+		
+//		System.out.println("Writing: " + Arrays.toString(buffer));
 		return 0;
 	}
 
@@ -122,8 +141,7 @@ public class MyDFS extends DFS {
 
 	@Override
 	public List<DFileID> listAllDFiles() {
-		// TODO Auto-generated method stub
-		return null;
+		return fileList;
 	}
 
 	@Override
