@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import virtualdisk.VirtualDisk;
@@ -176,6 +177,25 @@ public class MyDBuffer extends DBuffer {
 		}
 		return numBytesWritten;
 	}
+	
+	/*
+	 * Inode Methods
+	 */
+	
+	public int getFilesize() {
+		IntBuffer intBuf = ByteBuffer.wrap(myBuffer).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
+		int[] array = new int[intBuf.remaining()];
+		intBuf.get(array);
+		return array[0];
+	}
+	
+	public void writeFilesize(int filesize) {
+		byte[] byteArray = ByteBuffer.allocate(4).putInt(filesize).array();
+		for (int i = 0; i < 4; i++) {
+			myBuffer[i] = byteArray[i];
+		}
+	}
+	
 
 	public List<Integer> getBlockmap() {
 		IntBuffer intBuf = ByteBuffer.wrap(myBuffer).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
@@ -196,8 +216,15 @@ public class MyDBuffer extends DBuffer {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(intArray.length * 4);
 		IntBuffer intBuffer = byteBuffer.asIntBuffer();
 		intBuffer.put(intArray);
-		myBuffer = byteBuffer.array();
+		byte[] byteArray = byteBuffer.array();
+		for (int i = 4; i < byteArray.length; i++) {
+			myBuffer[i] = byteArray[i];
+		}
 	}
+	
+	/*
+	 * Upcalls from VirtualDisk
+	 */
 
 	/* An upcall from VirtualDisk layer to inform the completion of an IO operation */
 	@Override

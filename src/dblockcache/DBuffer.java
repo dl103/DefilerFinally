@@ -53,4 +53,8 @@ public abstract class DBuffer {
 	public abstract List<Integer> getBlockmap();
 	
 	public abstract void writeBlockmap(List<Integer> blockmap);
+	
+	public abstract int getFilesize();
+	
+	public abstract void writeFilesize(int filesize);
 }

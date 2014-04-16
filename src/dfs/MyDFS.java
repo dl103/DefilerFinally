@@ -83,6 +83,7 @@ public class MyDFS extends DFS {
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
 			DBuffer block = myCache.getBlock(blockID);
+			if (count > Constants.BLOCK_SIZE) count = Constants.BLOCK_SIZE;
 			block.read(buffer, startOffset, count);
 		}
 
@@ -100,11 +101,14 @@ public class MyDFS extends DFS {
 		while (blockList.size() * Constants.BLOCK_SIZE < count) {
 			blockList.add(findFirstFreeBlock());
 		}
+		if (count > inodeBlock.getFilesize()) inodeBlock.writeFilesize(count);
 		inodeBlock.writeBlockmap(blockList);
+//		System.out.println("MyDFS.blockList: " + blockList.toString());
 
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
 			DBuffer block = myCache.getBlock(blockID);
+			if (count > Constants.BLOCK_SIZE) count = Constants.BLOCK_SIZE;
 			block.write(buffer, startOffset, count);
 		}
 
@@ -113,11 +117,7 @@ public class MyDFS extends DFS {
 
 	@Override
 	public int sizeDFile(DFileID dFID) {
-
-		//for now, just consulting either a separate arraylist or first element
-		//in inode arraylist
-
-		return 0;
+		return myCache.getBlock(dFID.getDFileID()).getFilesize();
 	}
 
 	@Override
@@ -149,7 +149,6 @@ public class MyDFS extends DFS {
 				return i;
 			}			
 		}
-		System.out.println("Return -1)");
 		return -1;
 	}
 
