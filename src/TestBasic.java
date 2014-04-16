@@ -14,6 +14,5 @@ public class TestBasic {
 		dfs.write(newFile, writeBuf, 1000, 1024);
 		byte[] readBuf = new byte[1024];
 		dfs.read(newFile, readBuf, 0, 1024);
-		System.out.println(readBuf);
 	}
 }

@@ -18,6 +18,7 @@ local.properties
 .classpath
 .settings/
 .loadpath
+DSTORE.dat
 
 # External tool builders
 .externalToolBuilders/

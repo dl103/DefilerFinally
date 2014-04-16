@@ -1,16 +1,24 @@
 package dblockcache;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
+
+import virtualdisk.MyVirtualDisk;
+import virtualdisk.VirtualDisk;
+
+import common.Constants;
 
 public class MyDBufferCache extends DBufferCache {
 	
-	private HashMap<Integer, MyDBuffer> cache = new HashMap<Integer, MyDBuffer>();
+	private VirtualDisk myDisk;
+	private HashMap<Integer, MyDBuffer> myCache = new HashMap<Integer, MyDBuffer>();
 	//instantiate a queue system
 	
 	
-	public MyDBufferCache(int cacheSize) {
+	public MyDBufferCache(int cacheSize) throws FileNotFoundException, IOException {
 		super(cacheSize);
-		
+		myDisk = new MyVirtualDisk(Constants.vdiskName, false);
 	}
 	
 
@@ -18,6 +26,7 @@ public class MyDBufferCache extends DBufferCache {
 	public MyDBuffer getBlock(int blockID) {
 		
 		/*pseudocode*/
+		/*
 		synchronized(this){
 //			if the buffer is in the cache
 			for all dbuffers in the queue{
@@ -45,6 +54,14 @@ public class MyDBufferCache extends DBufferCache {
 		
 		//return some debuffer
 		return null;
+		*/
+		
+		if (!myCache.containsKey(blockID)) {
+			MyDBuffer dbuf = new MyDBuffer(blockID, myDisk);
+			dbuf.startFetch();
+			myCache.put(blockID, dbuf);
+		}
+		return myCache.get(blockID);
 	}
 
 	@Override
@@ -62,9 +79,10 @@ public class MyDBufferCache extends DBufferCache {
 	@Override
 	public void sync() {
 		// TODO Auto-generated method stub
-		for all the dbuffers in debuff queue:
+		/*for all the dbuffers in debuff queue:
 			dbuff.waitClean();
 			dbuff.startPush();
+		 */
 	}
 
 }

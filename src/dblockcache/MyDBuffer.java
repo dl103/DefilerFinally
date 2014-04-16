@@ -6,7 +6,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import virtualdisk.MyVirtualDisk;
+import virtualdisk.VirtualDisk;
 
 import common.Constants;
 
@@ -16,10 +16,11 @@ public class MyDBuffer extends DBuffer {
 	private byte[] myBuffer;
 	private int blockID;
 	private Object validLock, cleanLock;
-	private MyVirtualDisk disk; // or whatever you call it
+	private VirtualDisk disk; // or whatever you call it
 
-	public MyDBuffer(){
-		
+	public MyDBuffer(int id, VirtualDisk d){
+		blockID = id;
+		disk = d;
 		//blockID= //some id
 //		disk = //somedisk
 //		isFetching=false;
@@ -35,6 +36,7 @@ public class MyDBuffer extends DBuffer {
 	@Override
 	public void startFetch(){
 		isFetching=true;
+		myBuffer = new byte[Constants.BLOCK_SIZE];
 
 		try {
 			disk.startRequest(this, Constants.DiskOperationType.READ);
