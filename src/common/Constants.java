@@ -25,7 +25,7 @@ public class Constants {
 	public enum DiskOperationType {
 		READ, WRITE
 	};
-
+	
 	/* Virtual disk file/store name */
 	public static final String vdiskName = "DSTORE.dat";
 }
