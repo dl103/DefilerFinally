@@ -134,10 +134,10 @@ public class MyDBuffer extends DBuffer {
 	public int read(byte[] buffer, int startOffset, int count){
 		//check that dbuffer has a valid copy of the data
 		//check that count are for the buffer array
-		if (!isHeld || !isPinned || !isValid){
+		/*if (!isHeld || !isPinned || !isValid){
 			System.out.println("cannot read invalid or something");
 			return -1;
-		}
+		}*/
 		int numBytesRead=0;
 
 		for (int i=0; i<count;i++){
@@ -161,9 +161,9 @@ public class MyDBuffer extends DBuffer {
 	 */
 	@Override
 	public int write(byte[] buffer, int startOffset, int count){
-		if (isHeld||!isPinned){
+		/*if (isHeld||!isPinned){
 			return -1;
-		}
+		}*/
 		int numBytesWritten=0;
 		isClean=false;
 		for (int i=0; i<count;i++){

@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import javax.swing.event.ListSelectionEvent;
+
 import common.Constants;
 import common.DFileID;
 
@@ -36,7 +38,8 @@ public class MyDFS extends DFS {
 			e.printStackTrace();
 		} 
 
-		for (int i = 0; i < myBlockBitMap.length; i++) {
+		//Saving first few i's for inode blocks
+		for (int i = Constants.MAX_DFILES; i < myBlockBitMap.length; i++) {
 			myBlockBitMap[i] = true;
 		}
 		for (int i = 0; i < myInodeBitMap.length; i++) {
