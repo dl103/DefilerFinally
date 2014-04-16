@@ -21,16 +21,15 @@ public class MyDBuffer extends DBuffer {
 	public MyDBuffer(int id, VirtualDisk d){
 		blockID = id;
 		disk = d;
+		myBuffer=new byte[Constants.BLOCK_SIZE];
 		//blockID= //some id
-//		disk = //somedisk
-//		isFetching=false;
-//		isClean=false;
-//		isValid=false;
-//		isBusy=false;
-//		isPinned=false;
-//		isHeld=false;
-//		isPushing=false;
-//		isFetching=false;
+		isClean=true;
+		isValid=false;
+		isBusy=false;
+		isPinned=false;
+		isHeld=false;
+		isPushing=false;
+		isFetching=false;
 	}
 	/* Start an asynchronous fetch of associated block from the volume */
 	@Override
@@ -44,7 +43,16 @@ public class MyDBuffer extends DBuffer {
 			e.printStackTrace();
 		} 
 	}
-
+	
+	public void clearDBuffer(){
+		myBuffer = new byte[Constants.BLOCK_SIZE];
+		isHeld = false;
+		isValid = false;
+		isClean = true;//it is always clean from the start
+		isFetching = false;
+		isPushing = false;
+		isPinned = false;
+	}
 	/* Start an asynchronous write of buffer contents to block on volume */
 	@Override
 	public void startPush(){
