@@ -185,6 +185,17 @@ public class MyDBuffer extends DBuffer {
 		}
 		return blockmap;
 	}
+	
+	public void writeBlockmap(List<Integer> blockmap) {
+		int[] intArray = new int[blockmap.size()];
+		for (int i = 0; i < blockmap.size(); i++) {
+			intArray[i] = blockmap.get(i);
+		}
+		ByteBuffer byteBuffer = ByteBuffer.allocate(intArray.length * 4);
+		IntBuffer intBuffer = byteBuffer.asIntBuffer();
+		intBuffer.put(intArray);
+		myBuffer = byteBuffer.array();
+	}
 
 	/* An upcall from VirtualDisk layer to inform the completion of an IO operation */
 	@Override

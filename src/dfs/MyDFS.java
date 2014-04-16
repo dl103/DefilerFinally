@@ -65,7 +65,7 @@ public class MyDFS extends DFS {
 		
 		DBuffer inodeBlock = cache.getBlock(dFID.getDFileID());
 		
-		ArrayList<Integer> blockList = inodeBlock.getBlockmap();
+		List<Integer> blockList = inodeBlock.getBlockmap();
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
 			DBuffer block = cache.getBlock(blockID);
@@ -81,11 +81,12 @@ public class MyDFS extends DFS {
 		
 		
 		DBuffer inodeBlock = cache.getBlock(dFID.getDFileID());
-		ArrayList<Integer> blockList = inodeBlock.getBlockmap();
+		List<Integer> blockList = inodeBlock.getBlockmap();
 		
 		while (blockList.size() * Constants.BLOCK_SIZE < count) {
 			blockList.add(findFirstFree());
 		}
+		inodeBlock.writeBlockmap(blockList);
 		
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);

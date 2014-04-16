@@ -51,4 +51,6 @@ public abstract class DBuffer {
 	public abstract byte[] getBuffer(); 
 	
 	public abstract List<Integer> getBlockmap();
+	
+	public abstract void writeBlockmap(List<Integer> blockmap);
 }
