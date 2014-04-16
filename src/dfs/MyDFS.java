@@ -21,8 +21,8 @@ public class MyDFS extends DFS {
 	private MyVirtualDisk myDisk; 
 	private MyDBufferCache cache;  //need to make this
 	private PriorityQueue<DFileID> fileQueue = new PriorityQueue<DFileID>();
-	private boolean[] bitMap = new boolean[Constants.NUM_OF_BLOCKS]; //Wait for Dayvid
-	
+	private boolean[] myBlockBitMap = new boolean[Constants.NUM_OF_BLOCKS]; //Wait for Dayvid
+	private boolean[] myInodeBitMap = new boolean[Constants.MAX_DFILES];
 	
 	@Override
 	public void init(){
@@ -30,10 +30,24 @@ public class MyDFS extends DFS {
 			myDisk = new MyVirtualDisk(Constants.vdiskName, true);
 			cache = new MyDBufferCache(Constants.NUM_OF_CACHE_BLOCKS); 
 			
+			for (int i = 0; i < myBlockBitMap.length; i++) {
+				myBlockBitMap[i] = true;
+			}
+			for (int i = 0; i < myInodeBitMap.length; i++) {
+				myInodeBitMap[i] = true;
+			}
+			
 			/*
 			 * Need to retrieve the bitmap from virtual disk. 
 			 */
-			
+			for (int i = 0; i < Constants.NUM_OF_BLOCKS; i++) {
+				DBuffer inodeBlock = cache.getBlock(i);
+				List<Integer> blockList = inodeBlock.getBlockmap();
+				if (blockList.size() > 0) myInodeBitMap[i] = false;
+				for (int b = 0; b < blockList.size(); b++) {
+					myBlockBitMap[b] = false;
+				}
+			}
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -64,7 +78,6 @@ public class MyDFS extends DFS {
 	public int read(DFileID dFID, byte[] buffer, int startOffset, int count) {
 		
 		DBuffer inodeBlock = cache.getBlock(dFID.getDFileID());
-		
 		List<Integer> blockList = inodeBlock.getBlockmap();
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
@@ -84,7 +97,7 @@ public class MyDFS extends DFS {
 		List<Integer> blockList = inodeBlock.getBlockmap();
 		
 		while (blockList.size() * Constants.BLOCK_SIZE < count) {
-			blockList.add(findFirstFree());
+			blockList.add(findFirstFreeBlock());
 		}
 		inodeBlock.writeBlockmap(blockList);
 		
@@ -118,18 +131,24 @@ public class MyDFS extends DFS {
 		
 	}
 	
-	public int findFirstFree() {		
-		for (int i = 0 ; i < bitMap.length; i++) {
-			if (bitMap[i] == true) {
-				bitMap[i] = false;
+	public int findFirstFreeBlock() {		
+		for (int i = 0 ; i < myBlockBitMap.length; i++) {
+			if (myBlockBitMap[i] == true) {
+				myBlockBitMap[i] = false;
 				return i;
 			}			
 		}
 		return -1;
 	}
 	
-	
-	
-	
+	public int findFirstFreeInode() {		
+		for (int i = 0 ; i < myInodeBitMap.length; i++) {
+			if (myInodeBitMap[i] == true) {
+				myInodeBitMap[i] = false;
+				return i;
+			}			
+		}
+		return -1;
+	}
 	
 }
