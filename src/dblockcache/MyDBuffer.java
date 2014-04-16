@@ -22,15 +22,15 @@ public class MyDBuffer extends DBuffer {
 		blockID = id;
 		disk = d;
 		//blockID= //some id
-//		disk = //somedisk
-//		isFetching=false;
-//		isClean=false;
-//		isValid=false;
-//		isBusy=false;
-//		isPinned=false;
-//		isHeld=false;
-//		isPushing=false;
-//		isFetching=false;
+		//		disk = //somedisk
+		//		isFetching=false;
+		//		isClean=false;
+		//		isValid=false;
+		//		isBusy=false;
+		//		isPinned=false;
+		//		isHeld=false;
+		//		isPushing=false;
+		//		isFetching=false;
 	}
 	/* Start an asynchronous fetch of associated block from the volume */
 	@Override
@@ -176,18 +176,18 @@ public class MyDBuffer extends DBuffer {
 		}
 		return numBytesWritten;
 	}
-	
+
 	public List<Integer> getBlockmap() {
 		IntBuffer intBuf = ByteBuffer.wrap(myBuffer).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
 		int[] array = new int[intBuf.remaining()];
 		intBuf.get(array);
 		List<Integer> blockmap = new ArrayList<Integer>();
-		for (int block : array) {
-			if(block != 0) blockmap.add(block);
+		for (int i = 0; i < array.length; i++) {
+			if (array[i] != 0) blockmap.add(array[i]);
 		}
 		return blockmap;
 	}
-	
+
 	public void writeBlockmap(List<Integer> blockmap) {
 		int[] intArray = new int[blockmap.size()];
 		for (int i = 0; i < blockmap.size(); i++) {
@@ -208,7 +208,7 @@ public class MyDBuffer extends DBuffer {
 		 * change isValid
 		 * notifyAll()
 		 */
-		
+
 	}
 
 	/* An upcall from VirtualDisk layer to fetch the blockID associated with a startRequest operation */

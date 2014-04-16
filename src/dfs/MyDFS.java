@@ -3,6 +3,7 @@ package dfs;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -34,7 +35,7 @@ public class MyDFS extends DFS {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
-		
+
 		for (int i = 0; i < myBlockBitMap.length; i++) {
 			myBlockBitMap[i] = true;
 		}
@@ -48,7 +49,7 @@ public class MyDFS extends DFS {
 		for (int i = 0; i < Constants.MAX_DFILES; i++) {
 			DBuffer inodeBlock = myCache.getBlock(i);
 			List<Integer> blockList = inodeBlock.getBlockmap();
-//			System.out.println("Initializing: " + i);
+			//			System.out.println("Initializing: " + i);
 			if (blockList.size() > 0) {
 				myInodeBitMap[i] = false;
 			}
@@ -77,12 +78,9 @@ public class MyDFS extends DFS {
 		DBuffer inodeBlock = myCache.getBlock(dFID.getDFileID());
 		List<Integer> blockList = inodeBlock.getBlockmap();
 		for (int i = 0; i < blockList.size(); i++) {
-			//Accounts for the 0th entry being the file size
-			if (i != 0) {
-				int blockID = blockList.get(i);
-				DBuffer block = myCache.getBlock(blockID);
-				block.read(buffer, startOffset, count);
-			}
+			int blockID = blockList.get(i);
+			DBuffer block = myCache.getBlock(blockID);
+			block.read(buffer, startOffset, count);
 		}
 
 
@@ -102,12 +100,9 @@ public class MyDFS extends DFS {
 		inodeBlock.writeBlockmap(blockList);
 
 		for (int i = 0; i < blockList.size(); i++) {
-			//Accounts for the 0th entry being file size
-			if (i != 0) {
-				int blockID = blockList.get(i);
-				DBuffer block = myCache.getBlock(blockID);
-				block.write(buffer, startOffset, count);
-			}
+			int blockID = blockList.get(i);
+			DBuffer block = myCache.getBlock(blockID);
+			block.write(buffer, startOffset, count);
 		}
 
 		return 0;
