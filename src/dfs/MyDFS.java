@@ -3,8 +3,11 @@ package dfs;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.PriorityQueue;
+
+import javax.swing.event.ListSelectionEvent;
 
 import common.Constants;
 import common.DFileID;
@@ -34,8 +37,9 @@ public class MyDFS extends DFS {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} 
-		
-		for (int i = 0; i < myBlockBitMap.length; i++) {
+
+		//Saving first few i's for inode blocks
+		for (int i = Constants.MAX_DFILES; i < myBlockBitMap.length; i++) {
 			myBlockBitMap[i] = true;
 		}
 		for (int i = 0; i < myInodeBitMap.length; i++) {
@@ -48,7 +52,10 @@ public class MyDFS extends DFS {
 		for (int i = 0; i < Constants.MAX_DFILES; i++) {
 			DBuffer inodeBlock = myCache.getBlock(i);
 			List<Integer> blockList = inodeBlock.getBlockmap();
-			if (blockList.size() > 0) myInodeBitMap[i] = false;
+			//			System.out.println("Initializing: " + i);
+			if (blockList.size() > 0) {
+				myInodeBitMap[i] = false;
+			}
 			for (int b = 0; b < blockList.size(); b++) {
 				//Accounts for the 0th entry being the file size
 				if (b != 0) myBlockBitMap[b] = false;
@@ -74,12 +81,9 @@ public class MyDFS extends DFS {
 		DBuffer inodeBlock = myCache.getBlock(dFID.getDFileID());
 		List<Integer> blockList = inodeBlock.getBlockmap();
 		for (int i = 0; i < blockList.size(); i++) {
-			//Accounts for the 0th entry being the file size
-			if (i != 0) {
-				int blockID = blockList.get(i);
-				DBuffer block = myCache.getBlock(blockID);
-				block.read(buffer, startOffset, count);
-			}
+			int blockID = blockList.get(i);
+			DBuffer block = myCache.getBlock(blockID);
+			block.read(buffer, startOffset, count);
 		}
 
 
@@ -99,12 +103,9 @@ public class MyDFS extends DFS {
 		inodeBlock.writeBlockmap(blockList);
 
 		for (int i = 0; i < blockList.size(); i++) {
-			//Accounts for the 0th entry being file size
-			if (i != 0) {
-				int blockID = blockList.get(i);
-				DBuffer block = myCache.getBlock(blockID);
-				block.write(buffer, startOffset, count);
-			}
+			int blockID = blockList.get(i);
+			DBuffer block = myCache.getBlock(blockID);
+			block.write(buffer, startOffset, count);
 		}
 
 		return 0;
@@ -141,13 +142,14 @@ public class MyDFS extends DFS {
 		return -1;
 	}
 
-	public int findFirstFreeInode() {		
+	public int findFirstFreeInode() {
 		for (int i = 0 ; i < myInodeBitMap.length; i++) {
 			if (myInodeBitMap[i] == true) {
 				myInodeBitMap[i] = false;
 				return i;
 			}			
 		}
+		System.out.println("Return -1)");
 		return -1;
 	}
 
