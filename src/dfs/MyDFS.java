@@ -98,13 +98,13 @@ public class MyDFS extends DFS {
 		System.out.println("MyDFS.read(): " + blockList.toString());
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
-//			System.out.println("MyDFS.reading(): " + blockID);
+			System.out.println("MyDFS.reading(): " + blockID);
 			DBuffer block = myCache.getBlock(blockID);
 			if (count > Constants.BLOCK_SIZE) count = Constants.BLOCK_SIZE;
 			block.read(buffer, startOffset, count);
 		}
 
-//		System.out.println("Reading: " + Arrays.toString(buffer));
+		System.out.println("Reading: " + Arrays.toString(buffer));
 		return 0; //what is this supposed to return?
 	}
 
@@ -120,7 +120,7 @@ public class MyDFS extends DFS {
 		}
 		if (count > inodeBlock.getFilesize()) inodeBlock.writeFilesize(count);
 		inodeBlock.writeBlockmap(blockList);
-//		System.out.println("MyDFS.write(): " + blockList.toString());
+		System.out.println("MyDFS.write(): " + blockList.toString());
 
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
@@ -130,7 +130,7 @@ public class MyDFS extends DFS {
 			block.write(buffer, startOffset, count);
 		}
 		
-//		System.out.println("Writing: " + Arrays.toString(buffer));
+		System.out.println("Writing: " + Arrays.toString(buffer));
 		return 0;
 	}
 

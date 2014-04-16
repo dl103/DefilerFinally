@@ -221,8 +221,9 @@ public class MyDBuffer extends DBuffer {
 		IntBuffer intBuffer = byteBuffer.asIntBuffer();
 		intBuffer.put(intArray);
 		byte[] byteArray = byteBuffer.array();
-		for (int i = 4; i < byteArray.length; i++) {
-			myBuffer[i] = byteArray[i];
+		//Offset since myBuffer[i] starts at 4 and byteArray[i] starts at 0
+		for (int i = 4; i < byteArray.length+4; i++) {
+			myBuffer[i] = byteArray[i-4];
 		}
 	}
 	
