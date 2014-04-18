@@ -234,12 +234,21 @@ public class MyDBuffer extends DBuffer {
 	/* An upcall from VirtualDisk layer to inform the completion of an IO operation */
 	@Override
 	public void ioComplete(){
-		//no idea what to do here
-		/*
-		 * change isFetching
-		 * change isValid
-		 * notifyAll()
-		 */
+		if (isFetching){
+			isFetching=false;
+			isValid=true;
+			synchronized(validLock){
+				validLock.notify();
+			}
+		}
+		if (isPushing){
+			isPushing=false;
+			isClean=true;
+			synchronized(cleanLock){
+				cleanLock.notify();
+			}
+		}
+		 
 		
 	}
 
