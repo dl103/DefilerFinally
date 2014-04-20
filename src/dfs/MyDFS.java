@@ -21,7 +21,7 @@ public class MyDFS extends DFS {
 	private ArrayList<DFileID> fileList = new ArrayList<DFileID>();
 	private MyDBufferCache myCache;  //need to make this
 	private PriorityQueue<DFileID> fileQueue = new PriorityQueue<DFileID>();
-	
+
 	//true means there's free space!!!
 	private boolean[] myBlockBitMap = new boolean[Constants.NUM_OF_BLOCKS]; //Wait for Dayvid
 	public boolean[] myInodeBitMap = new boolean[Constants.MAX_DFILES];
@@ -29,7 +29,7 @@ public class MyDFS extends DFS {
 	public MyDFS() {
 		init();
 	}
-	
+
 	public ArrayList<DFileID> getFileList() {
 		return fileList;
 	}
@@ -90,8 +90,8 @@ public class MyDFS extends DFS {
 			 */
 		}
 		myInodeBitMap[dFID.getDFileID()] = true;			//indicate in inodebitmap that file is free
-		
-		
+
+
 	}
 
 	@Override
@@ -105,7 +105,11 @@ public class MyDFS extends DFS {
 			int blockID = blockList.get(i);
 			System.out.println("Reading from this block. MyDFS.reading(): " + blockID);
 			DBuffer block = myCache.getBlock(blockID);
-			if (count > Constants.BLOCK_SIZE) count = Constants.BLOCK_SIZE;
+			if (i < blockList.size() - 1) {
+				count = Constants.BLOCK_SIZE;
+			} else {
+				count = count % Constants.BLOCK_SIZE;
+			}
 			int offset = i * Constants.BLOCK_SIZE;
 			block.read(buffer, offset, count);
 		}
@@ -133,11 +137,15 @@ public class MyDFS extends DFS {
 			int blockID = blockList.get(i);
 			System.out.println("Writing to this block: " + blockID);
 			DBuffer block = myCache.getBlock(blockID);
-			if (count > Constants.BLOCK_SIZE) count = Constants.BLOCK_SIZE;
+			if (i < blockList.size() - 1) {
+				count = Constants.BLOCK_SIZE;
+			} else {
+				count = count % Constants.BLOCK_SIZE;
+			}
 			int offset = i * Constants.BLOCK_SIZE;
 			block.write(buffer, offset, count);
 		}
-		
+
 		System.out.println("Writing: " + Arrays.toString(buffer));
 		System.out.println("MyDFS.write's blockList after is: " + blockList.toString());
 		return 0;
@@ -176,10 +184,10 @@ public class MyDFS extends DFS {
 				return i;
 			}			
 		}
-		
+
 		Exception e = new Exception("Max # of files");
 		throw e;
-			
+
 	}
 
 }
