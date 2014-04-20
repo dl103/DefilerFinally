@@ -85,6 +85,13 @@ public class MyDBuffer extends DBuffer {
 		return isHeld;
 	}
 
+	public void holdBuffer(){
+		isHeld=true;
+	}
+	
+	public void releaseBuffer(){
+		isHeld=false;
+	}
 	/* Wait until the buffer has valid data, i.e., wait for fetch to complete */
 	@Override
 	public boolean waitValid(){
