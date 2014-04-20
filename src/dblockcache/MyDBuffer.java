@@ -196,8 +196,8 @@ public class MyDBuffer extends DBuffer {
 				numBytesWritten++;
 			}
 		}
-		System.out.println(blockID + "'s Parameter: " + Arrays.toString(buffer));
-		System.out.println(blockID + "'s Buffer: " + Arrays.toString(myBuffer));
+//		System.out.println(blockID + "'s Parameter: " + Arrays.toString(buffer));
+//		System.out.println(blockID + "'s Buffer: " + Arrays.toString(myBuffer));
 		return numBytesWritten;
 	}
 
