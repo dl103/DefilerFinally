@@ -20,6 +20,8 @@ public class MyDBufferCache extends DBufferCache {
 	public MyDBufferCache(int cacheSize) throws FileNotFoundException, IOException {
 		super(cacheSize);
 		myDisk = new MyVirtualDisk(Constants.vdiskName, false);
+		Thread t = new Thread(myDisk);
+		t.start();
 		myBufferQueue = new LinkedList<MyDBuffer>();
 		
 		for (int i = 0; i<cacheSize;i++){//do we know what is the number of buffers?

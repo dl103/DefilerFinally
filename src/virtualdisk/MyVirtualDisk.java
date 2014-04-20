@@ -9,7 +9,7 @@ import common.Constants.DiskOperationType;
 
 import dblockcache.DBuffer;
 
-public class MyVirtualDisk extends VirtualDisk implements Runnable {
+public class MyVirtualDisk extends VirtualDisk {
 	
 	private Queue<Request> myProcessQueue;
 	
