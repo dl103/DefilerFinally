@@ -11,34 +11,34 @@ import virtualdisk.VirtualDisk;
 import common.Constants;
 
 public class MyDBufferCache extends DBufferCache {
-	
+
 	private VirtualDisk myDisk;
 	private Queue<MyDBuffer> myBufferQueue = new LinkedList<MyDBuffer>();
 	private Queue<Integer> myIntegerQueue = new LinkedList<Integer>();
-	
-	
+
+
 	public MyDBufferCache(int cacheSize) throws FileNotFoundException, IOException {
 		super(cacheSize);
 		myDisk = new MyVirtualDisk(Constants.vdiskName, false);
 		Thread t = new Thread(myDisk);
 		t.start();
 		myBufferQueue = new LinkedList<MyDBuffer>();
-		
+
 		for (int i = 0; i<cacheSize;i++){//do we know what is the number of buffers?
 			myBufferQueue.add(new MyDBuffer(-1,myDisk));//default blockid is 0?
 		}
 	}
-	
+
 
 	@Override
 	public MyDBuffer getBlock(int blockID) {
-		
+
 		boolean isEvicted=false;
 		synchronized(this){
-//			if the buffer is in the cache
+			//			if the buffer is in the cache
 			for (MyDBuffer buf: myBufferQueue){
 				if (buf.getBlockID() == blockID){
-					System.out.println("MyBufferCache.getBlock: Found Block " + blockID + " in Queue.");
+					//					System.out.println("MyBufferCache.getBlock: Found Block " + blockID + " in Queue.");
 					//remove the dbuff and add it back to the queue
 					myBufferQueue.remove(buf);
 					myIntegerQueue.remove(buf.getBlockID());
@@ -47,9 +47,9 @@ public class MyDBufferCache extends DBufferCache {
 					return buf;
 				}
 			}
-			
-//			the buffer is not in the cache ie we need to evict.
-//			PROBLEM: if all buffers are busy
+
+			//			the buffer is not in the cache ie we need to evict.
+			//			PROBLEM: if all buffers are busy
 			while(!isEvicted){
 				for (MyDBuffer buf: myBufferQueue){
 					//if the buffer is not busy
@@ -63,11 +63,12 @@ public class MyDBufferCache extends DBufferCache {
 						buf.holdBuffer();
 						myBufferQueue.remove(buf);
 						myIntegerQueue.remove(buf.getBlockID());
-						
+
 						//carry out IO operation
+//						System.out.println("MyDBufferCache.getBlock(): retrieving Block " + blockID + " from disk");
 						MyDBuffer dbuf = new MyDBuffer(blockID, myDisk);
 						dbuf.startFetch();
-						
+
 						myBufferQueue.add(dbuf);
 						myIntegerQueue.add(dbuf.getBlockID());
 						return dbuf;	
@@ -84,7 +85,7 @@ public class MyDBufferCache extends DBufferCache {
 			myCache.put(blockID, dbuf);
 		}
 		return myCache.get(blockID);
-		*/
+		 */
 	}
 
 	public void releaseBlock(MyDBuffer buf) {
@@ -102,10 +103,10 @@ public class MyDBufferCache extends DBufferCache {
 	public void sync() {
 		// TODO Auto-generated method stub
 		for (MyDBuffer buf: myBufferQueue){
-			buf.startPush();
-			buf.waitClean();
-			
-			
+			if (buf.getBlockID() != -1) {
+				buf.startPush();
+				buf.waitClean();
+			}
 		}
 	}
 
@@ -113,7 +114,7 @@ public class MyDBufferCache extends DBufferCache {
 	@Override
 	public void releaseBlock(DBuffer buf) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }
