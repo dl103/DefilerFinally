@@ -98,11 +98,12 @@ public class MyDFS extends DFS {
 	public int read(DFileID dFID, byte[] buffer, int startOffset, int count) {
 
 		DBuffer inodeBlock = myCache.getBlock(dFID.getDFileID());
+		System.out.println("inodeBLock byte array: " + Arrays.toString(inodeBlock.getBuffer()));
 		List<Integer> blockList = inodeBlock.getBlockmap();
-		System.out.println("MyDFS.read(): " + blockList.toString());
+		System.out.println("Found this block to read to. MyDFS.read(): " + blockList.toString());
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
-			System.out.println("MyDFS.reading(): " + blockID);
+			System.out.println("Reading from this block. MyDFS.reading(): " + blockID);
 			DBuffer block = myCache.getBlock(blockID);
 			if (count > Constants.BLOCK_SIZE) count = Constants.BLOCK_SIZE;
 			block.read(buffer, startOffset, count);
@@ -118,17 +119,18 @@ public class MyDFS extends DFS {
 
 		DBuffer inodeBlock = myCache.getBlock(dFID.getDFileID());
 		List<Integer> blockList = inodeBlock.getBlockmap();
+		System.out.println("inodeBLock byte array: " + Arrays.toString(inodeBlock.getBuffer()));
 
 		while (blockList.size() * Constants.BLOCK_SIZE < count) {
 			blockList.add(findFirstFreeBlock());
 		}
 		if (count > inodeBlock.getFilesize()) inodeBlock.writeFilesize(count);
 		inodeBlock.writeBlockmap(blockList);
-		System.out.println("MyDFS.write(): " + blockList.toString());
+		System.out.println("Found this block to write to: MyDFS.write(): " + blockList.toString());
 
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
-			System.out.println(blockID);
+			System.out.println("Writing to this block: " + blockID);
 			DBuffer block = myCache.getBlock(blockID);
 			if (count > Constants.BLOCK_SIZE) count = Constants.BLOCK_SIZE;
 			block.write(buffer, startOffset, count);
