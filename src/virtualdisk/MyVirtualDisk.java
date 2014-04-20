@@ -23,6 +23,7 @@ public class MyVirtualDisk extends VirtualDisk {
 			throws IllegalArgumentException, IOException {
 		Request newRequest = new Request(buf, operation);
 		myProcessQueue.add(newRequest);
+//		System.out.println("Queue size: " + myProcessQueue.size());
 	}
 
 	@Override
@@ -33,16 +34,20 @@ public class MyVirtualDisk extends VirtualDisk {
 				switch (currentJob.getType()) {
 				case READ:
 					try {
-						readBlock(currentJob.getBuffer());
-						currentJob.getBuffer().ioComplete();
+						synchronized(currentJob.getBuffer()) {
+							readBlock(currentJob.getBuffer());
+							currentJob.getBuffer().ioComplete();
+						}
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 					break;
 				case WRITE:
 					try {
-						writeBlock(currentJob.getBuffer());
-						currentJob.getBuffer().ioComplete();
+						synchronized(currentJob.getBuffer()) {
+							writeBlock(currentJob.getBuffer());
+							currentJob.getBuffer().ioComplete();
+						}
 					} catch (IOException e) {
 						e.printStackTrace();
 					}

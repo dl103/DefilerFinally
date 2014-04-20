@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
 
 import common.Constants;
 import common.Constants.DiskOperationType;
@@ -106,6 +107,7 @@ public abstract class VirtualDisk implements IVirtualDisk, Runnable {
 			return -1;
 		}
 		_file.seek(seekLen);
+//		if (buf.getBlockID() > 511) System.out.println("VirtualDisk.readBlock's Buffer before writing: " + Arrays.toString(buf.getBuffer()));
 		return _file.read(buf.getBuffer(), 0, Constants.BLOCK_SIZE);
 	}
 

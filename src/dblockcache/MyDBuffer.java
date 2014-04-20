@@ -31,18 +31,22 @@ public class MyDBuffer extends DBuffer {
 		isHeld=false;
 		isPushing=false;
 		isFetching=false;
+		validLock = new Object();
+		cleanLock = new Object();
 	}
 	/* Start an asynchronous fetch of associated block from the volume */
 	@Override
 	public void startFetch(){
 		try {
-			isFetching=true;
-			disk.startRequest(this, Constants.DiskOperationType.READ);
+			synchronized (myBuffer) {
+				isFetching=true;
+				disk.startRequest(this, Constants.DiskOperationType.READ);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 
 	}
-	
+
 	public void clearDBuffer(){
 		myBuffer = new byte[Constants.BLOCK_SIZE];
 		isHeld = false;
@@ -88,7 +92,7 @@ public class MyDBuffer extends DBuffer {
 	public void holdBuffer(){
 		isHeld=true;
 	}
-	
+
 	public void releaseBuffer(){
 		isHeld=false;
 	}
@@ -153,13 +157,15 @@ public class MyDBuffer extends DBuffer {
 		}*/
 		int numBytesRead=0;
 
-		for (int i=0; i<count;i++){
-			if (i>myBuffer.length){
-				System.out.println("Buffer length is too small");
-				return numBytesRead;
+		synchronized (myBuffer) {
+			for (int i=0; i<count;i++){
+				if (i>myBuffer.length){
+					System.out.println("Buffer length is too small");
+					return numBytesRead;
+				}
+				buffer[i+startOffset]=myBuffer[i];
+				numBytesRead++;
 			}
-			buffer[i+startOffset]=myBuffer[i];
-			numBytesRead++;
 		}
 		return numBytesRead;
 	}
@@ -177,48 +183,53 @@ public class MyDBuffer extends DBuffer {
 		/*if (isHeld||!isPinned){
 			return -1;
 		}*/
+		waitValid();
 		int numBytesWritten=0;
 		isClean=false;
-		for (int i=0; i<count;i++){
-			if (i>myBuffer.length){
-				System.out.println("Buffer length is too small");
-				return numBytesWritten;
+		synchronized (myBuffer) {
+			for (int i=0; i<count;i++){
+				if (i>myBuffer.length){
+					System.out.println("Buffer length is too small");
+					return numBytesWritten;
+				}
+				myBuffer[i]=buffer[i+startOffset];
+				numBytesWritten++;
 			}
-			myBuffer[i]=buffer[i+startOffset];
-			numBytesWritten++;
 		}
+		System.out.println(blockID + "'s Parameter: " + Arrays.toString(buffer));
+		System.out.println(blockID + "'s Buffer: " + Arrays.toString(myBuffer));
 		return numBytesWritten;
 	}
-	
+
 	/*
 	 * Inode Methods
 	 */
-	
+
 	public int getFilesize() {
 		IntBuffer intBuf = ByteBuffer.wrap(myBuffer).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
 		int[] array = new int[intBuf.remaining()];
 		intBuf.get(array);
 		return array[0];
 	}
-	
+
 	public void writeFilesize(int filesize) {
 		byte[] byteArray = ByteBuffer.allocate(4).putInt(filesize).array();
 		for (int i = 0; i < 4; i++) {
 			myBuffer[i] = byteArray[i];
 		}
 	}
-	
+
 	public List<Integer> getBlockmap() {
 		IntBuffer intBuf = ByteBuffer.wrap(myBuffer).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
 		int[] array = new int[intBuf.remaining()];
 		intBuf.get(array);
 		List<Integer> blockmap = new ArrayList<Integer>();
 		for (int i = 1; i < array.length; i++) {
-			 if (array[i] != 0) blockmap.add(array[i]);
+			if (array[i] != 0) blockmap.add(array[i]);
 		}
 		return blockmap;
 	}
-	
+
 	public void writeBlockmap(List<Integer> blockmap) {
 		int[] intArray = new int[blockmap.size()];
 		for (int i = 0; i < blockmap.size(); i++) {
@@ -233,7 +244,7 @@ public class MyDBuffer extends DBuffer {
 			myBuffer[i] = byteArray[i-4];
 		}
 	}
-	
+
 	/*
 	 * Upcalls from VirtualDisk
 	 */
@@ -255,8 +266,8 @@ public class MyDBuffer extends DBuffer {
 				cleanLock.notify();
 			}
 		}
-		 
-		
+
+
 	}
 
 	/* An upcall from VirtualDisk layer to fetch the blockID associated with a startRequest operation */
