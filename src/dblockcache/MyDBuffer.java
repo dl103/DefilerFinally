@@ -221,6 +221,7 @@ public class MyDBuffer extends DBuffer {
 	}
 
 	public List<Integer> getBlockmap() {
+		waitValid();
 		IntBuffer intBuf = ByteBuffer.wrap(myBuffer).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
 		int[] array = new int[intBuf.remaining()];
 		intBuf.get(array);

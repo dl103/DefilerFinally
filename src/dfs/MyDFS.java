@@ -61,12 +61,12 @@ public class MyDFS extends DFS {
 			List<Integer> blockList = inodeBlock.getBlockmap();
 			//			System.out.println("Initializing: " + i);
 			if (blockList.size() > 0) {
-				System.out.println("MyDFS.init(): " + i + " file is in use");
+//				System.out.println("MyDFS.init(): " + i + " file is in use");
 				myInodeBitMap[i] = false;
 			}
 			for (int b = 0; b < blockList.size(); b++) {
-				//Accounts for the 0th entry being the file size
-				if (b != 0) myBlockBitMap[b] = false;
+//				System.out.println("MyDFS.init(): " + blockList.get(b) + " block is in use");
+				myBlockBitMap[blockList.get(b)] = false;
 			}
 		}
 
