@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import common.DFileID;
@@ -8,8 +9,12 @@ import dfs.MyDFS;
 
 public class TestBasic {
 
-	public static void main (String[] args) {
-		DFS dfs = new MyDFS();
+	public static void main (String[] args) throws Exception {
+		/*
+		 * Testing writing and reading
+		 */
+		
+		MyDFS dfs = new MyDFS();
 		DFileID newFile = dfs.createDFile();
 		DFileID newFile1 = dfs.createDFile();
 		//check for null?
@@ -18,7 +23,6 @@ public class TestBasic {
 		dfs.write(newFile, writeBuf, 0, 4002);
 		byte[] readBuf = new byte[4002];
 		dfs.read(newFile, readBuf, 0, 4002);
-	
 		
 		DFileID newFile2 = dfs.createDFile();
 		//check for null?
@@ -30,5 +34,18 @@ public class TestBasic {
 		System.out.println("TestBasic.main: " + Arrays.toString(readBuf));
 		System.out.println("TestBasic.main: " + Arrays.toString(readBuf2));
 		System.out.println("TestBasic.main: File size for file 1 = " + dfs.sizeDFile(newFile)); 
+		
+		/*
+		 * testing destroy file
+		 */
+		ArrayList<DFileID> fileList = dfs.getFileList();
+		System.out.println("filelist before delete: " + fileList.toString());
+		System.out.println("inodeBitMap before delete: " + Arrays.toString(dfs.myInodeBitMap));
+		dfs.destroyDFile(newFile2);
+		System.out.println("filelist after delete: " + fileList.toString());
+		System.out.println("inodeBitMap after delete: " + Arrays.toString(dfs.myInodeBitMap));
+		
+		
+		
 	}
 }

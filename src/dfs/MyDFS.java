@@ -24,10 +24,14 @@ public class MyDFS extends DFS {
 	
 	//true means there's free space!!!
 	private boolean[] myBlockBitMap = new boolean[Constants.NUM_OF_BLOCKS]; //Wait for Dayvid
-	private boolean[] myInodeBitMap = new boolean[Constants.MAX_DFILES];
+	public boolean[] myInodeBitMap = new boolean[Constants.MAX_DFILES];
 
 	public MyDFS() {
 		init();
+	}
+	
+	public ArrayList<DFileID> getFileList() {
+		return fileList;
 	}
 
 	@Override
@@ -67,7 +71,7 @@ public class MyDFS extends DFS {
 	}
 
 	@Override
-	public DFileID createDFile() {
+	public DFileID createDFile() throws Exception {
 		int newFile = findFirstFreeInode();
 		DFileID dFile = new DFileID(newFile);
 		fileList.add(dFile);
@@ -160,14 +164,17 @@ public class MyDFS extends DFS {
 		return -1;
 	}
 
-	public int findFirstFreeInode() {
+	public int findFirstFreeInode() throws Exception {
 		for (int i = 0 ; i < myInodeBitMap.length; i++) {
 			if (myInodeBitMap[i] == true) {
 				myInodeBitMap[i] = false;
 				return i;
 			}			
 		}
-		return -1;
+		
+		Exception e = new Exception("Max # of files");
+		throw e;
+			
 	}
 
 }

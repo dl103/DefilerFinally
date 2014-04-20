@@ -32,7 +32,7 @@ public abstract class DFS {
 	public abstract void init();
 
 	/* creates a new DFile and returns the DFileID, which is useful to uniquely identify the DFile*/
-	public abstract DFileID createDFile();
+	public abstract DFileID createDFile() throws Exception;
 	
 	/* destroys the file specified by the DFileID */
 	public abstract void destroyDFile(DFileID dFID);
