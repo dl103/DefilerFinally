@@ -13,17 +13,17 @@ import common.Constants;
 public class MyDBufferCache extends DBufferCache {
 	
 	private VirtualDisk myDisk;
-	private HashMap<Integer, MyDBuffer> myCache = new HashMap<Integer, MyDBuffer>();
-	//instantiate a queue system
+	private Queue<MyDBuffer> myBufferQueue = new LinkedList<MyDBuffer>();
+	private Queue<Integer> myIntegerQueue = new LinkedList<Integer>();
 	
 	
 	public MyDBufferCache(int cacheSize) throws FileNotFoundException, IOException {
 		super(cacheSize);
 		myDisk = new MyVirtualDisk(Constants.vdiskName, false);
-		Queue<MyDBuffer> myQueue = new LinkedList<MyDBuffer>();
+		myBufferQueue = new LinkedList<MyDBuffer>();
 		
-		for (int i = 0; i<numBuffers;i++){//do we know what is the number of buffers?
-			myQueue.add(new MyDBuffer(0,myDisk));//default blockid is 0?
+		for (int i = 0; i<cacheSize;i++){//do we know what is the number of buffers?
+			myBufferQueue.add(new MyDBuffer(0,myDisk));//default blockid is 0?
 		}
 	}
 	
@@ -31,47 +31,52 @@ public class MyDBufferCache extends DBufferCache {
 	@Override
 	public DBuffer getBlock(int blockID) {
 		
-		/*pseudocode*/
-		
+		boolean isEvicted=false;
 		synchronized(this){
 //			if the buffer is in the cache
-			for (MyDBuffer buf: myQueue){
+			for (MyDBuffer buf: myBufferQueue){
 				if (buf.getBlockID() == blockID){
 					//remove the dbuff and add it back to the queue
-					//do we need to hold the buffer or something?
-					myQueue.remove(buf);
-					myQueue.add(buf);
+					myBufferQueue.remove(buf);
+					myIntegerQueue.remove(buf.getBlockID());
+					myBufferQueue.add(buf);
+					myIntegerQueue.add(buf.getBlockID());
 					return buf;
 				}
 			}
 			
 //			the buffer is not in the cache ie we need to evict.
-			while(eviction is not done){
-				for (MyDBuffer buf: myQueue){
+			while(!isEvicted){
+				for (MyDBuffer buf: myBufferQueue){
 					//if the buffer is not busy
-					if (!buf.isBusy){
-						myQueue.remove(buf);
-						//switch clear the buffer and add that block in
-						clear the buffer
-						update inode
-						find block from disk
-						put block into buffer
-						myQueue.add(buf)
+					if (!buf.isBusy()){
+						//if the buffer is dirty, sync it
+						if(!buf.checkClean()){
+							buf.waitClean();
+							buf.startPush();
+						}
+						myBufferQueue.remove(buf);
+						myIntegerQueue.remove(buf.getBlockID());
+						
+						MyDBuffer dbuf = new MyDBuffer(blockID, myDisk);
+						dbuf.startFetch();
+						
+						myBufferQueue.add(dbuf);
+						myIntegerQueue.add(dbuf.getBlockID());
+						return dbuf;	
 					}
 				}
 			}
-			return that buffer
 		}
-
 		return null;
-		
-		
+		/*
 		if (!myCache.containsKey(blockID)) {
 			MyDBuffer dbuf = new MyDBuffer(blockID, myDisk);
 			dbuf.startFetch();
 			myCache.put(blockID, dbuf);
 		}
 		return myCache.get(blockID);
+		*/
 	}
 
 	@Override
@@ -89,10 +94,11 @@ public class MyDBufferCache extends DBufferCache {
 	@Override
 	public void sync() {
 		// TODO Auto-generated method stub
-		/*for all the dbuffers in debuff queue:
-			dbuff.waitClean();
-			dbuff.startPush();
-		 */
+		for (MyDBuffer buf: myBufferQueue){
+			buf.waitClean();
+			buf.startPush();
+			
+		}
 	}
 
 }
