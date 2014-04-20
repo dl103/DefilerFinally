@@ -3,10 +3,11 @@ package dblockcache;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import virtualdisk.MyVirtualDisk;
 import virtualdisk.VirtualDisk;
-
 import common.Constants;
 
 public class MyDBufferCache extends DBufferCache {
@@ -19,42 +20,51 @@ public class MyDBufferCache extends DBufferCache {
 	public MyDBufferCache(int cacheSize) throws FileNotFoundException, IOException {
 		super(cacheSize);
 		myDisk = new MyVirtualDisk(Constants.vdiskName, false);
+		Queue<MyDBuffer> myQueue = new LinkedList<MyDBuffer>();
+		
+		for (int i = 0; i<numBuffers;i++){//do we know what is the number of buffers?
+			myQueue.add(new MyDBuffer(0,myDisk));//default blockid is 0?
+		}
 	}
 	
 
 	@Override
-	public MyDBuffer getBlock(int blockID) {
+	public DBuffer getBlock(int blockID) {
 		
 		/*pseudocode*/
-		/*
+		
 		synchronized(this){
 //			if the buffer is in the cache
-			for all dbuffers in the queue{
-				if dbuffer.getblockid == blockID:
+			for (MyDBuffer buf: myQueue){
+				if (buf.getBlockID() == blockID){
 					//remove the dbuff and add it back to the queue
 					//do we need to hold the buffer or something?
-					queue.remove debuff
-					queue.add debuff
-					return dbuffer;
+					myQueue.remove(buf);
+					myQueue.add(buf);
+					return buf;
+				}
 			}
 			
 //			the buffer is not in the cache ie we need to evict.
-			for all dbuffers in the queue{
-				//if the buffer is not busy
-				if (!buffer.isBusy){
-					queue.pop(buffer)
+			while(eviction is not done){
+				for (MyDBuffer buf: myQueue){
+					//if the buffer is not busy
+					if (!buf.isBusy){
+						myQueue.remove(buf);
+						//switch clear the buffer and add that block in
+						clear the buffer
+						update inode
+						find block from disk
+						put block into buffer
+						myQueue.add(buf)
+					}
 				}
 			}
-//			if we have gone through all the buffers but we dont find any to evict
-//			we have to wait for one buffer to be available to get evicted
-//			then we evict that shit
-//			push that block into buffer
+			return that buffer
 		}
-		
-		
-		//return some debuffer
+
 		return null;
-		*/
+		
 		
 		if (!myCache.containsKey(blockID)) {
 			MyDBuffer dbuf = new MyDBuffer(blockID, myDisk);
