@@ -25,7 +25,7 @@ public class MyDBufferCache extends DBufferCache {
 		myBufferQueue = new LinkedList<MyDBuffer>();
 		
 		for (int i = 0; i<cacheSize;i++){//do we know what is the number of buffers?
-			myBufferQueue.add(new MyDBuffer(0,myDisk));//default blockid is 0?
+			myBufferQueue.add(new MyDBuffer(-1,myDisk));//default blockid is 0?
 		}
 	}
 	
@@ -38,6 +38,7 @@ public class MyDBufferCache extends DBufferCache {
 //			if the buffer is in the cache
 			for (MyDBuffer buf: myBufferQueue){
 				if (buf.getBlockID() == blockID){
+					System.out.println("MyBufferCache.getBlock: Found Block " + blockID + " in Queue.");
 					//remove the dbuff and add it back to the queue
 					myBufferQueue.remove(buf);
 					myIntegerQueue.remove(buf.getBlockID());

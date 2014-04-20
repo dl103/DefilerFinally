@@ -231,6 +231,7 @@ public class MyDBuffer extends DBuffer {
 	}
 
 	public void writeBlockmap(List<Integer> blockmap) {
+		waitValid();
 		int[] intArray = new int[blockmap.size()];
 		for (int i = 0; i < blockmap.size(); i++) {
 			intArray[i] = blockmap.get(i);
