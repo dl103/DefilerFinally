@@ -16,7 +16,7 @@ import common.Constants.DiskOperationType;
 
 import dblockcache.DBuffer;
 
-public abstract class VirtualDisk implements IVirtualDisk {
+public abstract class VirtualDisk implements IVirtualDisk, Runnable {
 
 	private String _volName;
 	private RandomAccessFile _file;
@@ -118,4 +118,5 @@ public abstract class VirtualDisk implements IVirtualDisk {
 		_file.seek(seekLen);
 		_file.write(buf.getBuffer(), 0, Constants.BLOCK_SIZE);
 	}
+	
 }
