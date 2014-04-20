@@ -101,8 +101,9 @@ public class MyDBufferCache extends DBufferCache {
 	public void sync() {
 		// TODO Auto-generated method stub
 		for (MyDBuffer buf: myBufferQueue){
-			buf.waitClean();
 			buf.startPush();
+			buf.waitClean();
+			
 			
 		}
 	}
