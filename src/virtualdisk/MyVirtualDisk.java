@@ -34,6 +34,7 @@ public class MyVirtualDisk extends VirtualDisk {
 				case READ:
 					try {
 						readBlock(currentJob.getBuffer());
+						currentJob.getBuffer().ioComplete();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -41,6 +42,7 @@ public class MyVirtualDisk extends VirtualDisk {
 				case WRITE:
 					try {
 						writeBlock(currentJob.getBuffer());
+						currentJob.getBuffer().ioComplete();
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
