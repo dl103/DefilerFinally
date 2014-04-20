@@ -29,7 +29,7 @@ public class MyDBufferCache extends DBufferCache {
 	
 
 	@Override
-	public DBuffer getBlock(int blockID) {
+	public MyDBuffer getBlock(int blockID) {
 		
 		boolean isEvicted=false;
 		synchronized(this){
@@ -46,6 +46,7 @@ public class MyDBufferCache extends DBufferCache {
 			}
 			
 //			the buffer is not in the cache ie we need to evict.
+//			PROBLEM: if all buffers are busy
 			while(!isEvicted){
 				for (MyDBuffer buf: myBufferQueue){
 					//if the buffer is not busy
@@ -55,9 +56,12 @@ public class MyDBufferCache extends DBufferCache {
 							buf.waitClean();
 							buf.startPush();
 						}
+						//hold buffer
+						buf.holdBuffer();
 						myBufferQueue.remove(buf);
 						myIntegerQueue.remove(buf.getBlockID());
 						
+						//carry out IO operation
 						MyDBuffer dbuf = new MyDBuffer(blockID, myDisk);
 						dbuf.startFetch();
 						
@@ -68,6 +72,7 @@ public class MyDBufferCache extends DBufferCache {
 				}
 			}
 		}
+		//something went wrong if we reach here
 		return null;
 		/*
 		if (!myCache.containsKey(blockID)) {
@@ -79,11 +84,10 @@ public class MyDBufferCache extends DBufferCache {
 		*/
 	}
 
-	@Override
-	public void releaseBlock(DBuffer buf) {
+	public void releaseBlock(MyDBuffer buf) {
 		// TODO Auto-generated method stub
 		try{
-			//dbuffer.isHeld=false;
+			buf.releaseBuffer();
 		}
 		catch(Exception E){
 			E.printStackTrace();
@@ -99,6 +103,13 @@ public class MyDBufferCache extends DBufferCache {
 			buf.startPush();
 			
 		}
+	}
+
+
+	@Override
+	public void releaseBlock(DBuffer buf) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
