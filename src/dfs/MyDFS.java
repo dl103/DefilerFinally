@@ -61,11 +61,11 @@ public class MyDFS extends DFS {
 			List<Integer> blockList = inodeBlock.getBlockmap();
 			//			System.out.println("Initializing: " + i);
 			if (blockList.size() > 0) {
-//				System.out.println("MyDFS.init(): " + i + " file is in use");
+				System.out.println("MyDFS.init(): " + i + " file is in use");
 				myInodeBitMap[i] = false;
 			}
 			for (int b = 0; b < blockList.size(); b++) {
-//				System.out.println("MyDFS.init(): " + blockList.get(b) + " block is in use");
+				//				System.out.println("MyDFS.init(): " + blockList.get(b) + " block is in use");
 				myBlockBitMap[blockList.get(b)] = false;
 			}
 		}
@@ -75,6 +75,10 @@ public class MyDFS extends DFS {
 	@Override
 	public DFileID createDFile() throws Exception {
 		int newFile = findFirstFreeInode();
+		if (newFile == -1) {
+			System.err.println("No more free files!");
+			throw new Exception();
+		}
 		System.out.println("MyDFS.createDFile(): First free file is " + newFile);
 		DFileID dFile = new DFileID(newFile);
 		fileList.add(dFile);
@@ -106,7 +110,7 @@ public class MyDFS extends DFS {
 		System.out.println("Found this block to read to. MyDFS.read(): " + blockList.toString());
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
-//			System.out.println("Reading from this block. MyDFS.reading(): " + blockID);
+			//			System.out.println("Reading from this block. MyDFS.reading(): " + blockID);
 			DBuffer block = myCache.getBlock(blockID);
 			if (i < blockList.size() - 1) {
 				count = Constants.BLOCK_SIZE;
@@ -138,7 +142,7 @@ public class MyDFS extends DFS {
 
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
-//			System.out.println("Writing to this block: " + blockID);
+			//			System.out.println("Writing to this block: " + blockID);
 			DBuffer block = myCache.getBlock(blockID);
 			if (i < blockList.size() - 1) {
 				count = Constants.BLOCK_SIZE;
