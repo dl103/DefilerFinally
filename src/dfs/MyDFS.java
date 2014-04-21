@@ -85,10 +85,12 @@ public class MyDFS extends DFS {
 		List<Integer> blockList = inodeBlock.getBlockmap();
 		for (int i = 0; i < blockList.size(); i++) {
 			myBlockBitMap[blockList.get(i)] = true;			//change in blockbitmap to indicate it is free
-			/*
-			 * Need to get actual block and clear it. 
-			 */
 		}
+		ArrayList<Integer> newBlocks = new ArrayList<Integer>();
+		for (int i = 0; i < Constants.BLOCK_SIZE*500; i++) {
+			newBlocks.add(0);
+		}
+		inodeBlock.writeBlockmap(newBlocks);
 		myInodeBitMap[dFID.getDFileID()] = true;			//indicate in inodebitmap that file is free
 
 
