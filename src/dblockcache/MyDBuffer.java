@@ -167,7 +167,7 @@ public class MyDBuffer extends DBuffer {
 				numBytesRead++;
 			}
 		}
-		System.out.println("MyDBuffer.read(): Actual buffer reads: " + Arrays.toString(myBuffer));
+//		System.out.println("MyDBuffer.read(): Actual buffer reads: " + Arrays.toString(myBuffer));
 		return numBytesRead;
 	}
 
