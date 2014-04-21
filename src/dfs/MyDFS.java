@@ -26,9 +26,6 @@ public class MyDFS extends DFS {
 	private boolean[] myBlockBitMap = new boolean[Constants.NUM_OF_BLOCKS]; //Wait for Dayvid
 	public boolean[] myInodeBitMap = new boolean[Constants.MAX_DFILES];
 
-	public MyDFS() {
-		init();
-	}
 
 	public ArrayList<DFileID> getFileList() {
 		return fileList;
