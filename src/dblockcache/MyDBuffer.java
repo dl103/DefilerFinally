@@ -156,7 +156,7 @@ public class MyDBuffer extends DBuffer {
 			return -1;
 		}*/
 		int numBytesRead=0;
-
+		waitValid();
 		synchronized (myBuffer) {
 			for (int i=0; i<count;i++){
 				if (i>myBuffer.length){
@@ -167,6 +167,7 @@ public class MyDBuffer extends DBuffer {
 				numBytesRead++;
 			}
 		}
+//		System.out.println("MyDBuffer.read(): Actual buffer reads: " + Arrays.toString(myBuffer));
 		return numBytesRead;
 	}
 
@@ -220,6 +221,7 @@ public class MyDBuffer extends DBuffer {
 	}
 
 	public List<Integer> getBlockmap() {
+		waitValid();
 		IntBuffer intBuf = ByteBuffer.wrap(myBuffer).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
 		int[] array = new int[intBuf.remaining()];
 		intBuf.get(array);
@@ -244,6 +246,7 @@ public class MyDBuffer extends DBuffer {
 		for (int i = 4; i < byteArray.length+4; i++) {
 			myBuffer[i] = byteArray[i-4];
 		}
+		System.out.println("MyDBuffer.writeBlockmap(): " + blockmap.toString());
 	}
 
 	/*

@@ -36,6 +36,7 @@ public class MyDFS extends DFS {
 
 	@Override
 	public void init() {
+		System.out.println("Initializing DFS...");
 		try {
 			myCache = new MyDBufferCache(Constants.NUM_OF_CACHE_BLOCKS);
 		} catch (FileNotFoundException e) {
@@ -60,11 +61,12 @@ public class MyDFS extends DFS {
 			List<Integer> blockList = inodeBlock.getBlockmap();
 			//			System.out.println("Initializing: " + i);
 			if (blockList.size() > 0) {
+				System.out.println("MyDFS.init(): " + i + " file is in use");
 				myInodeBitMap[i] = false;
 			}
 			for (int b = 0; b < blockList.size(); b++) {
-				//Accounts for the 0th entry being the file size
-				if (b != 0) myBlockBitMap[b] = false;
+				//				System.out.println("MyDFS.init(): " + blockList.get(b) + " block is in use");
+				myBlockBitMap[blockList.get(b)] = false;
 			}
 		}
 
@@ -73,6 +75,11 @@ public class MyDFS extends DFS {
 	@Override
 	public DFileID createDFile() throws Exception {
 		int newFile = findFirstFreeInode();
+		if (newFile == -1) {
+			System.err.println("No more free files!");
+			throw new Exception();
+		}
+		System.out.println("MyDFS.createDFile(): First free file is " + newFile);
 		DFileID dFile = new DFileID(newFile);
 		fileList.add(dFile);
 		return dFile;
@@ -103,9 +110,10 @@ public class MyDFS extends DFS {
 		List<Integer> blockList = inodeBlock.getBlockmap();
 		System.out.println("MyDFS.read(): " + inodeBlock.getBlockID() + "'s BlockList: " + blockList.toString());
 		System.out.println("Found this block to read to. MyDFS.read(): " + blockList.toString());
+		int byteCount = 0;
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
-			System.out.println("Reading from this block. MyDFS.reading(): " + blockID);
+			//			System.out.println("Reading from this block. MyDFS.reading(): " + blockID);
 			DBuffer block = myCache.getBlock(blockID);
 			if (i < blockList.size() - 1) {
 				count = Constants.BLOCK_SIZE;
@@ -113,11 +121,11 @@ public class MyDFS extends DFS {
 				count = count % Constants.BLOCK_SIZE;
 			}
 			int offset = i * Constants.BLOCK_SIZE;
-			block.read(buffer, offset, count);
+			byteCount += block.read(buffer, offset, count);
 		}
 
 		System.out.println("Reading: " + Arrays.toString(buffer));
-		return 0; //what is this supposed to return?
+		return byteCount; //what is this supposed to return?
 	}
 
 	@Override
@@ -126,18 +134,19 @@ public class MyDFS extends DFS {
 
 		DBuffer inodeBlock = myCache.getBlock(dFID.getDFileID());
 		List<Integer> blockList = inodeBlock.getBlockmap();
-		System.out.println("MyDFS.write(): " + inodeBlock.getBlockID() + "'s BlockList: " + blockList.toString());
+		System.out.println("MyDFS.write(): " + inodeBlock.getBlockID() + "'s BlockList before is: " + blockList.toString());
 
 		while (blockList.size() * Constants.BLOCK_SIZE < count) {
 			blockList.add(findFirstFreeBlock());
 		}
 		if (count > inodeBlock.getFilesize()) inodeBlock.writeFilesize(count);
 		inodeBlock.writeBlockmap(blockList);
-		System.out.println("Found this block to write to: MyDFS.write(): " + blockList.toString());
+		System.out.println("MyDFS.write(): " + inodeBlock.getBlockID() + "'s BlockList after is: " + blockList.toString());
+		int byteCount = 0;
 
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
-			System.out.println("Writing to this block: " + blockID);
+			//			System.out.println("Writing to this block: " + blockID);
 			DBuffer block = myCache.getBlock(blockID);
 			if (i < blockList.size() - 1) {
 				count = Constants.BLOCK_SIZE;
@@ -145,12 +154,11 @@ public class MyDFS extends DFS {
 				count = count % Constants.BLOCK_SIZE;
 			}
 			int offset = i * Constants.BLOCK_SIZE;
-			block.write(buffer, offset, count);
+			byteCount += block.write(buffer, offset, count);
 		}
 
 		System.out.println("Writing: " + Arrays.toString(buffer));
-		System.out.println("MyDFS.write's blockList after is: " + blockList.toString());
-		return 0;
+		return byteCount;
 	}
 
 	@Override
@@ -166,6 +174,7 @@ public class MyDFS extends DFS {
 	@Override
 	public void sync() {
 		// TODO Auto-generated method stub
+		myCache.sync();
 
 	}
 

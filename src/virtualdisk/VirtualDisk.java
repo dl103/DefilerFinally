@@ -119,6 +119,7 @@ public abstract class VirtualDisk implements IVirtualDisk, Runnable {
 		int seekLen = buf.getBlockID() * Constants.BLOCK_SIZE;
 		_file.seek(seekLen);
 		_file.write(buf.getBuffer(), 0, Constants.BLOCK_SIZE);
+		if (buf.getBlockID() < 3 || buf.getBlockID() > 511) System.out.println("VirtualDisk wrote " + Arrays.toString(buf.getBuffer()) + " to " + buf.getBlockID());
 	}
 	
 }
