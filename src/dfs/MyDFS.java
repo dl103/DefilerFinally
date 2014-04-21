@@ -92,10 +92,12 @@ public class MyDFS extends DFS {
 		List<Integer> blockList = inodeBlock.getBlockmap();
 		for (int i = 0; i < blockList.size(); i++) {
 			myBlockBitMap[blockList.get(i)] = true;			//change in blockbitmap to indicate it is free
-			/*
-			 * Need to get actual block and clear it. 
-			 */
 		}
+		ArrayList<Integer> newBlocks = new ArrayList<Integer>();
+		for (int i = 0; i < Constants.BLOCK_SIZE*500; i++) {
+			newBlocks.add(0);
+		}
+		inodeBlock.writeBlockmap(newBlocks);
 		myInodeBitMap[dFID.getDFileID()] = true;			//indicate in inodebitmap that file is free
 
 
@@ -108,6 +110,7 @@ public class MyDFS extends DFS {
 		List<Integer> blockList = inodeBlock.getBlockmap();
 		System.out.println("MyDFS.read(): " + inodeBlock.getBlockID() + "'s BlockList: " + blockList.toString());
 		System.out.println("Found this block to read to. MyDFS.read(): " + blockList.toString());
+		int byteCount = 0;
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
 			//			System.out.println("Reading from this block. MyDFS.reading(): " + blockID);
@@ -118,11 +121,11 @@ public class MyDFS extends DFS {
 				count = count % Constants.BLOCK_SIZE;
 			}
 			int offset = i * Constants.BLOCK_SIZE;
-			block.read(buffer, offset, count);
+			byteCount += block.read(buffer, offset, count);
 		}
 
 		System.out.println("Reading: " + Arrays.toString(buffer));
-		return 0; //what is this supposed to return?
+		return byteCount; //what is this supposed to return?
 	}
 
 	@Override
@@ -139,6 +142,7 @@ public class MyDFS extends DFS {
 		if (count > inodeBlock.getFilesize()) inodeBlock.writeFilesize(count);
 		inodeBlock.writeBlockmap(blockList);
 		System.out.println("MyDFS.write(): " + inodeBlock.getBlockID() + "'s BlockList after is: " + blockList.toString());
+		int byteCount = 0;
 
 		for (int i = 0; i < blockList.size(); i++) {
 			int blockID = blockList.get(i);
@@ -150,11 +154,11 @@ public class MyDFS extends DFS {
 				count = count % Constants.BLOCK_SIZE;
 			}
 			int offset = i * Constants.BLOCK_SIZE;
-			block.write(buffer, offset, count);
+			byteCount += block.write(buffer, offset, count);
 		}
 
 		System.out.println("Writing: " + Arrays.toString(buffer));
-		return 0;
+		return byteCount;
 	}
 
 	@Override
