@@ -68,7 +68,7 @@ public class MyDBuffer extends DBuffer {
 	}
 
 	/* Check whether the buffer has valid data 
-	 A dbuf is valid iff it has the “correct” copy of the data */
+	 A dbuf is valid iff it has the correct copy of the data */
 	@Override
 	public boolean checkValid(){
 		return isValid;
@@ -76,7 +76,7 @@ public class MyDBuffer extends DBuffer {
 
 	/*Suggestion.  
 	 * A dbuf is pinned if I/O is in progress, i.e., a VDF request has started but not yet completed.  
-	 * Don’t evict a dbuf that is pinned or held: pick another candidate.
+	 * Don't evict a dbuf that is pinned or held: pick another candidate.
 	 * */
 	public boolean checkPinned(){
 		return isPinned;
