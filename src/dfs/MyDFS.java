@@ -94,7 +94,7 @@ public class MyDFS extends DFS {
 			myBlockBitMap[blockList.get(i)] = true;			//change in blockbitmap to indicate it is free
 		}
 		ArrayList<Integer> newBlocks = new ArrayList<Integer>();
-		for (int i = 0; i < Constants.BLOCK_SIZE*500; i++) {
+		for (int i = 0; i < 500; i++) {
 			newBlocks.add(0);
 		}
 		inodeBlock.writeBlockmap(newBlocks);
