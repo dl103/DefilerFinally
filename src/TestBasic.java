@@ -25,7 +25,7 @@ public class TestBasic {
 		byte[] readBuf = new byte[writeBuf.length];
 		dfs.read(newFile, readBuf, 0, readBuf.length);
 //		dfs.sync();
-		System.out.println("DFS has been synced");
+//		System.out.println("DFS has been synced");
 		
 		
 		
